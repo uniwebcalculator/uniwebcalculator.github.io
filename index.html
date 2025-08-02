@@ -62,9 +62,23 @@
   }
   button:hover { background:#ff9a33; }
 
-  table { width:100%; border-collapse: collapse; margin-top:15px; font-size:0.8rem; }
+  /* ✅ Scrollable table with sticky header */
+  .table-container {
+    max-height: 500px; /* Adjust height as needed */
+    overflow-y: auto;
+    margin-top: 15px;
+    border: 1px solid #444;
+    border-radius: 5px;
+  }
+  table { width:100%; border-collapse: collapse; font-size:0.8rem; }
   th, td { border:1px solid #555; padding:5px; text-align:center; }
-  th { background:#ff7a00; color:white; position: sticky; top: 0; z-index: 2; }
+  th { 
+    background:#ff7a00; 
+    color:white; 
+    position: sticky; 
+    top: 0; 
+    z-index: 2;
+  }
   tr:nth-child(even) { background-color:#2d2d2d; }
   tr:nth-child(odd) { background-color:#1c1c1c; }
   tr.bonus-row { background:#265e26 !important; }
@@ -81,10 +95,6 @@
     to { background-size: var(--target-size, 0%) 100%; }
   }
 
-  .pagination { text-align:center; margin-top:10px; }
-  .pagination button { margin:3px; padding:5px 10px; font-size:0.8rem; background:#ff7a00; color:white; border:none; border-radius:4px; }
-  .pagination button.active { background:#ffb84d; color:#000; }
-
   @media(max-width:750px){
     .container { grid-template-columns: 1fr; }
     .input-row input { width:100%; }
@@ -99,37 +109,38 @@
   <div class="input-section">
     <div class="input-row"><label>Start Date:</label><input type="date" id="startDate"></div>
     <div class="input-row"><label>Initial Amount ($):</label><input type="number" id="initialAmount" value="100" oninput="updateInfo()"></div>
-    <div class="input-row"><label>Earning Days:</label><input type="number" id="earningDays" value="30"></div>
+    <div class="input-row"><label> Days:</label><input type="number" id="earningDays" value="30"></div>
     <p id="dailyRateInfo">Daily Rate: 0%</p>
     <p id="bonusInfo">Bonus: $5.00 (5% of initial)</p>
     <button onclick="calculate()">CALCULATE</button>
   </div>
 
   <div class="summary" id="summary">
-    <p>Days: <span id="dayCount">0</span></p>
-    <p>Staking Earnings: <span class="highlight-orange" id="totalEarnings">$0.00</span></p>
+    <p>Earning Days (Excl. Sundays): <span id="dayCount">0</span></p>
+    <p>Total Earnings: <span class="highlight-orange" id="totalEarnings">$0.00</span></p>
     <p>Total Balance: <span class="highlight-green" id="totalBalance">$0.00</span></p>
   </div>
 </div>
 
-<table id="resultTable" style="display:none;">
-  <thead>
-    <tr>
-      <th>Date</th><th>Day</th><th>Day #</th>
-      <th>Daily Fixed Earning</th><th>Interest on Stake</th>
-      <th>New Stake</th><th>Staked Balance</th><th>Total Balance</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
-<div class="pagination" id="pagination"></div>
+<!-- ✅ Scrollable table wrapper -->
+<div class="table-container" style="display:none;" id="tableWrapper">
+  <table id="resultTable">
+    <thead>
+      <tr>
+        <th>Date</th><th>Day</th><th>Day #</th>
+        <th>Daily Fixed Earning</th><th>Interest on Stake</th>
+        <th>New Stake</th><th>Staked Balance</th><th>Total Balance</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
 
 <script>
 let tableData = [];
-let rowsPerPage = 50;
-let currentPage = 1;
 const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
+// ✅ Set start date to today automatically
 document.addEventListener('DOMContentLoaded', () => {
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('startDate').value = today;
@@ -189,6 +200,8 @@ function calculate(){
   const rate = getRate(initialAmount);
   const dayNames=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 
+  let activeDays = 0; // ✅ Count only non-Sunday days
+
   for(let i=0;i<earningDays;i++){
     let date = new Date(start);
     date.setDate(start.getDate()+i);
@@ -196,10 +209,14 @@ function calculate(){
 
     let fixed=0,interest=0,bonusToday=0;
 
-    if(i===0){ bonusToday=bonus; }
-    else if(dow!==0){
+    if(i===0){ 
+      bonusToday=bonus; 
+      activeDays++; // First day always counts
+    }
+    else if(dow!==0){ // ✅ Skip Sundays for earnings
       fixed=initialAmount*rate;
       interest=stakedBalance*rate;
+      activeDays++;
     }
 
     let newStake=fixed+interest+bonusToday;
@@ -224,25 +241,22 @@ function calculate(){
     });
   }
 
-  document.getElementById('dayCount').innerText=earningDays;
+  // ✅ Update summary (earning days only)
+  document.getElementById('dayCount').innerText = activeDays;
   animateCounter('totalEarnings', 0, totalEarnings, 1000);
   animateCounter('totalBalance', 0, initialAmount+stakedBalance, 1000);
 
-  currentPage=1;
   renderTable();
 }
 
 function renderTable(){
   const tbody=document.querySelector('#resultTable tbody');
   tbody.innerHTML="";
-  document.getElementById('resultTable').style.display="table";
-  const start=(currentPage-1)*rowsPerPage;
-  const end=start+rowsPerPage;
-  const page=tableData.slice(start,end);
+  document.getElementById('tableWrapper').style.display="block";
 
   const maxBalance = Math.max(...tableData.map(r=>r.total));
 
-  page.forEach(r=>{
+  tableData.forEach(r=>{
     let cls=r.bonus?"bonus-row":(r.sunday?"sunday":"");
     const stakedPercent = (r.staked/maxBalance*100).toFixed(2);
     const totalPercent = (r.total/maxBalance*100).toFixed(2);
@@ -255,23 +269,7 @@ function renderTable(){
       <td class="growth" style="--target-size:${totalPercent}%">${r.totalDisplay}</td>
     </tr>`;
   });
-  renderPagination();
 }
-
-function renderPagination(){
-  let totalPages=Math.ceil(tableData.length/rowsPerPage);
-  const pag=document.getElementById('pagination');
-  if(totalPages<=1){pag.innerHTML="";return;}
-  let html="";
-  if(currentPage>1)html+=`<button onclick="gotoPage(${currentPage-1})">Prev</button>`;
-  for(let i=1;i<=totalPages;i++){
-    html+=`<button onclick="gotoPage(${i})" class="${i===currentPage?'active':''}">${i}</button>`;
-  }
-  if(currentPage<totalPages)html+=`<button onclick="gotoPage(${currentPage+1})">Next</button>`;
-  pag.innerHTML=html;
-}
-
-function gotoPage(p){currentPage=p;renderTable();}
 </script>
 
 </body>
