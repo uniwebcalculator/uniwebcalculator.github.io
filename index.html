@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Staking Compounding Calculator</title>
+<style>
+  body { font-family: Arial, sans-serif; background:#1c1c1c; color:#fff; margin:0; padding:0; }
+  h2 { background:#ff7a00; color:#fff; text-align:center; margin:0; padding:15px; }
+  .container { max-width: 600px; margin:20px auto; padding:20px; background:#2a2a2a; border-radius:10px; }
+  label { display:block; margin-top:15px; font-weight:bold; }
+  input[type=number],input[type=date] {
+    width:100%; padding:8px; margin-top:5px;
+    border:none; border-radius:5px; font-size:1rem;
+  }
+  button {
+    width:100%; padding:12px; margin-top:20px;
+    font-size:1.1rem; font-weight:bold; cursor:pointer;
+    background:#ff7a00; color:white; border:none; border-radius:5px;
+  }
+  button:hover { background:#ff9a33; }
+  .summary { background:#333; padding:15px; border-radius:6px; margin-top:20px; }
+  .summary p { margin:5px 0; }
+  .highlight-orange { color:#ffb84d; }
+  .highlight-green { color:#80ff80; }
+
+  table { width:100%; border-collapse: collapse; margin-top:20px; font-size:0.85rem; }
+  th, td { border:1px solid #555; padding:6px; text-align:center; }
+  th { background:#ff7a00; color:white; }
+  tr:nth-child(even) { background-color:#2d2d2d; }
+  tr:nth-child(odd) { background-color:#1c1c1c; }
+  tr.bonus-row { background:#265e26 !important; }
+  tr.sunday { background:#5e2626 !important; }
+  tfoot tr { font-weight:bold; background:#333; }
+
+  .pagination { text-align:center; margin-top:15px; }
+  .pagination button { margin:3px; padding:6px 12px; font-size:0.9rem; background:#ff7a00; color:white; border:none; border-radius:4px; }
+  .pagination button.active { background:#ffb84d; color:#000; }
+
+  @media(max-width:600px){
+    th,td{font-size:0.7rem;padding:4px;}
+    button{width:100%;margin-top:10px;}
+  }
+</style>
+</head>
+<body>
+
+<h2>Staking Compounding Calculator</h2>
+
+<div class="container">
+  <label>Start Date:</label>
+  <input type="date" id="startDate">
+
+  <label>Initial Amount ($):</label>
+  <input type="number" id="initialAmount" value="100" oninput="updateInfo()">
+
+  <label>Number of Earning Days:</label>
+  <input type="number" id="earningDays" value="30">
+
+  <p id="dailyRateInfo">Daily Rate: 0%</p>
+  <p id="bonusInfo">Bonus: $5.00 (5% of initial)</p>
+
+  <button onclick="calculate()">CALCULATE</button>
+
+  <div class="summary" id="summary" style="display:none;">
+    <p>Days: <span id="dayCount">0</span></p>
+    <p>Total Earnings: <span class="highlight-orange" id="totalEarnings">$0.00</span></p>
+    <p>Total Balance: <span class="highlight-green" id="totalBalance">$0.00</span></p>
+  </div>
+
+  <table id="resultTable" style="display:none;">
+    <thead>
+      <tr>
+        <th>Date</th><th>Day</th><th>Day #</th>
+        <th>Daily Fixed Earning</th><th>Interest on Stake</th>
+        <th>New Stake</th><th>Staked Balance</th><th>Total Balance</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <div class="pagination" id="pagination"></div>
+</div>
+
+<script>
+let tableData = [];
+let rowsPerPage = 50;
+let currentPage = 1;
+
+// Set start date to today automatically
+document.addEventListener('DOMContentLoaded', () => {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('startDate').value = today;
+  updateInfo();
+});
+
+function getRate(amount){
+  if(amount>=35000)return 0.035;
+  if(amount>=25000)return 0.0325;
+  if(amount>=17000)return 0.03;
+  if(amount>=10000)return 0.0275;
+  if(amount>=5000)return 0.026;
+  if(amount>=2500)return 0.025;
+  if(amount>=1000)return 0.023;
+  if(amount>=300)return 0.0215;
+  if(amount>=100)return 0.02;
+  if(amount>=20)return 0.015;
+  return 0;
+}
+
+function updateInfo(){
+  const amt = parseFloat(document.getElementById('initialAmount').value) || 0;
+  const bonus = amt * 0.05;
+  const rate = getRate(amt) * 100;
+  document.getElementById('bonusInfo').innerText = `Bonus: $${bonus.toFixed(2)} (5% of initial)`;
+  document.getElementById('dailyRateInfo').innerText = `Daily Rate: ${rate.toFixed(2)}%`;
+}
+
+function calculate(){
+  const startDate = document.getElementById('startDate').value;
+  const initialAmount = parseFloat(document.getElementById('initialAmount').value);
+  const earningDays = parseInt(document.getElementById('earningDays').value);
+
+  if(!startDate||!initialAmount||earningDays<=0){alert("Fill all required fields");return;}
+
+  tableData = [];
+  let start = new Date(startDate);
+  let stakedBalance = 0;
+  let totalEarnings = 0;
+  const bonus = initialAmount*0.05;
+  const rate = getRate(initialAmount);
+  const dayNames=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+  for(let i=0;i<earningDays;i++){
+    let date = new Date(start);
+    date.setDate(start.getDate()+i);
+    let dow = date.getDay();
+
+    let fixed=0,interest=0,bonusToday=0;
+
+    if(i===0){ bonusToday=bonus; }
+    else if(dow!==0){
+      fixed=initialAmount*rate;
+      interest=stakedBalance*rate;
+    }
+
+    let newStake=fixed+interest+bonusToday;
+    if(i===0||dow!==0) stakedBalance+=newStake;
+    totalEarnings += newStake;
+
+    let totalBalance=initialAmount+stakedBalance;
+
+    tableData.push({
+      date:date.toISOString().slice(0,10),
+      dayName:dayNames[dow],
+      dayNum:i+1,
+      fixed:fixed.toFixed(2),
+      interest:interest.toFixed(4),
+      newStake:newStake.toFixed(4),
+      staked:stakedBalance.toFixed(4),
+      total:totalBalance.toFixed(2),
+      bonus:i===0,
+      sunday:dow===0
+    });
+  }
+
+  // update summary
+  document.getElementById('summary').style.display='block';
+  document.getElementById('dayCount').innerText=earningDays;
+  document.getElementById('totalEarnings').innerText="$"+totalEarnings.toFixed(2);
+  document.getElementById('totalBalance').innerText="$"+(initialAmount+stakedBalance).toFixed(2);
+
+  currentPage=1;
+  renderTable();
+}
+
+function renderTable(){
+  const tbody=document.querySelector('#resultTable tbody');
+  tbody.innerHTML="";
+  document.getElementById('resultTable').style.display="table";
+  const start=(currentPage-1)*rowsPerPage;
+  const end=start+rowsPerPage;
+  const page=tableData.slice(start,end);
+
+  page.forEach(r=>{
+    let cls=r.bonus?"bonus-row":(r.sunday?"sunday":"");
+    tbody.innerHTML+=`<tr class="${cls}">
+      <td>${r.date}</td><td>${r.dayName}</td><td>${r.dayNum}</td>
+      <td>${r.fixed}</td><td>${r.interest}</td>
+      <td>${r.newStake}</td><td>${r.staked}</td><td>${r.total}</td>
+    </tr>`;
+  });
+  renderPagination();
+}
+
+function renderPagination(){
+  let totalPages=Math.ceil(tableData.length/rowsPerPage);
+  const pag=document.getElementById('pagination');
+  if(totalPages<=1){pag.innerHTML="";return;}
+  let html="";
+  if(currentPage>1)html+=`<button onclick="gotoPage(${currentPage-1})">Prev</button>`;
+  for(let i=1;i<=totalPages;i++){
+    html+=`<button onclick="gotoPage(${i})" class="${i===currentPage?'active':''}">${i}</button>`;
+  }
+  if(currentPage<totalPages)html+=`<button onclick="gotoPage(${currentPage+1})">Next</button>`;
+  pag.innerHTML=html;
+}
+
+function gotoPage(p){currentPage=p;renderTable();}
+</script>
+
+</body>
+</html>
