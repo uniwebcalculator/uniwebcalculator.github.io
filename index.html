@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Staking Compounding Calculator</title>
+<title>UNIWEB Calculator</title>
 <style>
   body { font-family: Arial, sans-serif; background:#1c1c1c; color:#fff; margin:0; padding:0; }
   h2 { background:#ff7a00; color:#fff; text-align:center; margin:0; padding:12px; }
@@ -35,7 +35,6 @@
     margin-right:8px;
     white-space:nowrap;
   }
-  /* ✅ Date input wider to show full date */
   .input-row input[type=date] {
     width: 180px;
     padding:5px;
@@ -62,13 +61,14 @@
   }
   button:hover { background:#ff9a33; }
 
-  /* ✅ Scrollable table with sticky header */
+  /* ✅ Virtual scrolling container */
   .table-container {
-    max-height: 500px; /* Adjust height as needed */
+    max-height: 500px;
     overflow-y: auto;
     margin-top: 15px;
     border: 1px solid #444;
     border-radius: 5px;
+    position: relative;
   }
   table { width:100%; border-collapse: collapse; font-size:0.8rem; }
   th, td { border:1px solid #555; padding:5px; text-align:center; }
@@ -84,15 +84,35 @@
   tr.bonus-row { background:#265e26 !important; }
   tr.sunday { background:#5e2626 !important; }
 
-  td.growth {
-    background-image: linear-gradient(to right, rgba(0,255,0,0.2), transparent);
-    background-repeat: no-repeat;
-    background-size: 0% 100%;
-    animation: growBar 1s ease-out forwards;
+  /* Placeholder div for virtual rows */
+  .spacer { height: 0; }
+
+  /* ✅ Loading overlay */
+  .loading-overlay {
+    position: fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction: column;
+    font-size: 1.2rem;
+    color: white;
+    z-index: 9999;
+    display: none;
   }
-  @keyframes growBar {
-    from { background-size: 0% 100%; }
-    to { background-size: var(--target-size, 0%) 100%; }
+  .spinner {
+    border: 6px solid #444;
+    border-top: 6px solid #ff7a00;
+    border-radius: 50%;
+    width: 50px; height: 50px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 10px;
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg);}
+    100% { transform: rotate(360deg);}
   }
 
   @media(max-width:750px){
@@ -103,13 +123,13 @@
 </head>
 <body>
 
-<h2>UNIWEB Calculator</h2>
+<h2>UNIWEB CALCULATOR</h2>
 
 <div class="container">
   <div class="input-section">
     <div class="input-row"><label>Start Date:</label><input type="date" id="startDate"></div>
     <div class="input-row"><label>Initial Amount ($):</label><input type="number" id="initialAmount" value="100" oninput="updateInfo()"></div>
-    <div class="input-row"><label> Days:</label><input type="number" id="earningDays" value="30"></div>
+    <div class="input-row"><label>Days:</label><input type="number" id="earningDays" value="30"></div>
     <p id="dailyRateInfo">Daily Rate: 0%</p>
     <p id="bonusInfo">Bonus: $5.00 (5% of initial)</p>
     <button onclick="calculate()">CALCULATE</button>
@@ -117,14 +137,13 @@
 
   <div class="summary" id="summary">
     <p>Earning Days (Excl. Sundays): <span id="dayCount">0</span></p>
-    <p>Total Earnings: <span class="highlight-orange" id="totalEarnings">$0.00</span></p>
+    <p>Staking Earnings: <span class="highlight-orange" id="totalEarnings">$0.00</span></p>
     <p>Total Balance: <span class="highlight-green" id="totalBalance">$0.00</span></p>
   </div>
 </div>
 
-<!-- ✅ Scrollable table wrapper -->
 <div class="table-container" style="display:none;" id="tableWrapper">
-  <table id="resultTable">
+  <table>
     <thead>
       <tr>
         <th>Date</th><th>Day</th><th>Day #</th>
@@ -132,15 +151,22 @@
         <th>New Stake</th><th>Staked Balance</th><th>Total Balance</th>
       </tr>
     </thead>
-    <tbody></tbody>
+    <tbody id="virtualBody"></tbody>
   </table>
+  <div class="spacer" id="spacer"></div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  Calculating, please wait...
 </div>
 
 <script>
 let tableData = [];
-const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+let rowHeight = 28; 
+let visibleRows = 50;
+let currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
-// ✅ Set start date to today automatically
 document.addEventListener('DOMContentLoaded', () => {
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('startDate').value = today;
@@ -173,7 +199,6 @@ function animateCounter(elementId, start, end, duration){
   const el = document.getElementById(elementId);
   const range = end - start;
   let startTime = null;
-  
   function step(timestamp){
     if(!startTime) startTime = timestamp;
     const progress = Math.min((timestamp - startTime) / duration, 1);
@@ -181,16 +206,18 @@ function animateCounter(elementId, start, end, duration){
     el.innerText = currency.format(value);
     if(progress < 1) requestAnimationFrame(step);
   }
-  
   requestAnimationFrame(step);
 }
 
-function calculate(){
+async function calculate(){
   const startDate = document.getElementById('startDate').value;
   const initialAmount = parseFloat(document.getElementById('initialAmount').value);
   const earningDays = parseInt(document.getElementById('earningDays').value);
 
   if(!startDate||!initialAmount||earningDays<=0){alert("Fill all required fields");return;}
+
+  document.getElementById('loadingOverlay').style.display='flex';
+  await new Promise(r=>setTimeout(r,50)); // Let UI update
 
   tableData = [];
   let start = new Date(startDate);
@@ -200,7 +227,7 @@ function calculate(){
   const rate = getRate(initialAmount);
   const dayNames=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 
-  let activeDays = 0; // ✅ Count only non-Sunday days
+  let activeDays = 0;
 
   for(let i=0;i<earningDays;i++){
     let date = new Date(start);
@@ -209,21 +236,12 @@ function calculate(){
 
     let fixed=0,interest=0,bonusToday=0;
 
-    if(i===0){ 
-      bonusToday=bonus; 
-      activeDays++; // First day always counts
-    }
-    else if(dow!==0){ // ✅ Skip Sundays for earnings
-      fixed=initialAmount*rate;
-      interest=stakedBalance*rate;
-      activeDays++;
-    }
+    if(i===0){ bonusToday=bonus; activeDays++; }
+    else if(dow!==0){ fixed=initialAmount*rate; interest=stakedBalance*rate; activeDays++; }
 
     let newStake=fixed+interest+bonusToday;
     if(i===0||dow!==0) stakedBalance+=newStake;
     totalEarnings += newStake;
-
-    let totalBalance=initialAmount+stakedBalance;
 
     tableData.push({
       date:date.toISOString().slice(0,10),
@@ -232,43 +250,56 @@ function calculate(){
       fixed:currency.format(fixed),
       interest:currency.format(interest),
       newStake:currency.format(newStake),
-      staked:stakedBalance,
-      total:totalBalance,
       stakedDisplay: currency.format(stakedBalance),
-      totalDisplay: currency.format(totalBalance),
+      totalDisplay: currency.format(initialAmount+stakedBalance),
       bonus:i===0,
       sunday:dow===0
     });
+
+    // Yield every 500 rows for responsiveness
+    if(i % 500 === 0) await new Promise(r=>setTimeout(r,0));
   }
 
-  // ✅ Update summary (earning days only)
   document.getElementById('dayCount').innerText = activeDays;
   animateCounter('totalEarnings', 0, totalEarnings, 1000);
   animateCounter('totalBalance', 0, initialAmount+stakedBalance, 1000);
 
-  renderTable();
+  renderVirtualTable();
+  document.getElementById('loadingOverlay').style.display='none';
 }
 
-function renderTable(){
-  const tbody=document.querySelector('#resultTable tbody');
+function renderVirtualTable(){
+  const wrapper = document.getElementById('tableWrapper');
+  const tbody = document.getElementById('virtualBody');
+  const spacer = document.getElementById('spacer');
+
+  wrapper.style.display="block";
   tbody.innerHTML="";
-  document.getElementById('tableWrapper').style.display="block";
+  spacer.style.height = (tableData.length * rowHeight) + "px";
 
-  const maxBalance = Math.max(...tableData.map(r=>r.total));
+  wrapper.onscroll = () => {
+    const scrollTop = wrapper.scrollTop;
+    const startIndex = Math.floor(scrollTop / rowHeight);
+    const endIndex = Math.min(startIndex + visibleRows, tableData.length);
+    tbody.style.transform = `translateY(${startIndex*rowHeight}px)`;
 
-  tableData.forEach(r=>{
-    let cls=r.bonus?"bonus-row":(r.sunday?"sunday":"");
-    const stakedPercent = (r.staked/maxBalance*100).toFixed(2);
-    const totalPercent = (r.total/maxBalance*100).toFixed(2);
+    let html="";
+    for(let i=startIndex; i<endIndex; i++){
+      const r = tableData[i];
+      const cls = r.bonus?"bonus-row":(r.sunday?"sunday":"");
+      html += `<tr class="${cls}">
+        <td>${r.date}</td><td>${r.dayName}</td><td>${r.dayNum}</td>
+        <td>${r.fixed}</td><td>${r.interest}</td>
+        <td>${r.newStake}</td>
+        <td>${r.stakedDisplay}</td>
+        <td>${r.totalDisplay}</td>
+      </tr>`;
+    }
+    tbody.innerHTML = html;
+  };
 
-    tbody.innerHTML+=`<tr class="${cls}">
-      <td>${r.date}</td><td>${r.dayName}</td><td>${r.dayNum}</td>
-      <td>${r.fixed}</td><td>${r.interest}</td>
-      <td>${r.newStake}</td>
-      <td class="growth" style="--target-size:${stakedPercent}%">${r.stakedDisplay}</td>
-      <td class="growth" style="--target-size:${totalPercent}%">${r.totalDisplay}</td>
-    </tr>`;
-  });
+  wrapper.scrollTop = 0;
+  wrapper.onscroll();
 }
 </script>
 
