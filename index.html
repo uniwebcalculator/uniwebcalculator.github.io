@@ -6,35 +6,70 @@
 <title>Staking Compounding Calculator</title>
 <style>
   body { font-family: Arial, sans-serif; background:#1c1c1c; color:#fff; margin:0; padding:0; }
-  h2 { background:#ff7a00; color:#fff; text-align:center; margin:0; padding:15px; }
-  .container { max-width: 600px; margin:20px auto; padding:20px; background:#2a2a2a; border-radius:10px; }
-  label { display:block; margin-top:15px; font-weight:bold; }
-  input[type=number],input[type=date] {
-    width:100%; padding:8px; margin-top:5px;
-    border:none; border-radius:5px; font-size:1rem;
+  h2 { background:#ff7a00; color:#fff; text-align:center; margin:0; padding:12px; }
+
+  .container {
+    max-width: 900px; 
+    margin:20px auto; 
+    padding:15px; 
+    background:#2a2a2a; 
+    border-radius:10px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
   }
-  button {
-    width:100%; padding:12px; margin-top:20px;
-    font-size:1.1rem; font-weight:bold; cursor:pointer;
-    background:#ff7a00; color:white; border:none; border-radius:5px;
+  .input-section, .summary {
+    background:#333; 
+    border-radius:8px;
+    padding:12px;
   }
-  button:hover { background:#ff9a33; }
-  .summary { background:#333; padding:15px; border-radius:6px; margin-top:20px; }
-  .summary p { margin:5px 0; }
+
+  .input-row {
+    display: flex; 
+    justify-content: space-between;
+    align-items:center;
+    margin-bottom: 10px;
+  }
+  .input-row label {
+    font-size:0.9rem;
+    margin-right:8px;
+    white-space:nowrap;
+  }
+  /* ✅ Date input wider to show full date */
+  .input-row input[type=date] {
+    width: 180px;
+    padding:5px;
+    font-size:0.9rem;
+    border:none;
+    border-radius:5px;
+  }
+  .input-row input[type=number] {
+    width: 130px;
+    padding:5px;
+    font-size:0.9rem;
+    border:none;
+    border-radius:5px;
+  }
+
+  .summary p { margin:6px 0; font-size:0.95rem; }
   .highlight-orange { color:#ffb84d; font-weight:bold; }
   .highlight-green { color:#80ff80; font-weight:bold; }
 
-  /* Table with sticky header */
-  table { width:100%; border-collapse: collapse; margin-top:20px; font-size:0.85rem; position: relative; }
-  th, td { border:1px solid #555; padding:6px; text-align:center; }
+  button {
+    width:100%; padding:10px; margin-top:10px;
+    font-size:1rem; font-weight:bold; cursor:pointer;
+    background:#ff7a00; color:white; border:none; border-radius:5px;
+  }
+  button:hover { background:#ff9a33; }
+
+  table { width:100%; border-collapse: collapse; margin-top:15px; font-size:0.8rem; }
+  th, td { border:1px solid #555; padding:5px; text-align:center; }
   th { background:#ff7a00; color:white; position: sticky; top: 0; z-index: 2; }
   tr:nth-child(even) { background-color:#2d2d2d; }
   tr:nth-child(odd) { background-color:#1c1c1c; }
   tr.bonus-row { background:#265e26 !important; }
   tr.sunday { background:#5e2626 !important; }
-  tfoot tr { font-weight:bold; background:#333; }
 
-  /* Animated growth gradient */
   td.growth {
     background-image: linear-gradient(to right, rgba(0,255,0,0.2), transparent);
     background-repeat: no-repeat;
@@ -46,53 +81,48 @@
     to { background-size: var(--target-size, 0%) 100%; }
   }
 
-  .pagination { text-align:center; margin-top:15px; }
-  .pagination button { margin:3px; padding:6px 12px; font-size:0.9rem; background:#ff7a00; color:white; border:none; border-radius:4px; }
+  .pagination { text-align:center; margin-top:10px; }
+  .pagination button { margin:3px; padding:5px 10px; font-size:0.8rem; background:#ff7a00; color:white; border:none; border-radius:4px; }
   .pagination button.active { background:#ffb84d; color:#000; }
 
-  @media(max-width:600px){
-    th,td{font-size:0.7rem;padding:4px;}
-    button{width:100%;margin-top:10px;}
+  @media(max-width:750px){
+    .container { grid-template-columns: 1fr; }
+    .input-row input { width:100%; }
   }
 </style>
 </head>
 <body>
 
-<h2>Staking Compounding Calculator</h2>
+<h2>UNIWEB Calculator</h2>
 
 <div class="container">
-  <label>Start Date:</label>
-  <input type="date" id="startDate">
-
-  <label>Initial Amount ($):</label>
-  <input type="number" id="initialAmount" value="100" oninput="updateInfo()">
-
-  <label>Number of Earning Days:</label>
-  <input type="number" id="earningDays" value="30">
-
-  <p id="dailyRateInfo">Daily Rate: 0%</p>
-  <p id="bonusInfo">Bonus: $5.00 (5% of initial)</p>
-
-  <button onclick="calculate()">CALCULATE</button>
-
-  <div class="summary" id="summary" style="display:none;">
-    <p>Days: <span id="dayCount">0</span></p>
-    <p>Total Earnings: <span class="highlight-orange" id="totalEarnings">$0.00</span></p>
-    <p>Total Balance: <span class="highlight-green" id="totalBalance">$0.00</span></p>
+  <div class="input-section">
+    <div class="input-row"><label>Start Date:</label><input type="date" id="startDate"></div>
+    <div class="input-row"><label>Initial Amount ($):</label><input type="number" id="initialAmount" value="100" oninput="updateInfo()"></div>
+    <div class="input-row"><label>Earning Days:</label><input type="number" id="earningDays" value="30"></div>
+    <p id="dailyRateInfo">Daily Rate: 0%</p>
+    <p id="bonusInfo">Bonus: $5.00 (5% of initial)</p>
+    <button onclick="calculate()">CALCULATE</button>
   </div>
 
-  <table id="resultTable" style="display:none;">
-    <thead>
-      <tr>
-        <th>Date</th><th>Day</th><th>Day #</th>
-        <th>Daily Fixed Earning</th><th>Interest on Stake</th>
-        <th>New Stake</th><th>Staked Balance</th><th>Total Balance</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-  <div class="pagination" id="pagination"></div>
+  <div class="summary" id="summary">
+    <p>Days: <span id="dayCount">0</span></p>
+    <p>Staking Earnings: <span class="highlight-orange" id="totalEarnings">$0.00</span></p>
+    <p>Total Balance: <span class="highlight-green" id="totalBalance">$0.00</span></p>
+  </div>
 </div>
+
+<table id="resultTable" style="display:none;">
+  <thead>
+    <tr>
+      <th>Date</th><th>Day</th><th>Day #</th>
+      <th>Daily Fixed Earning</th><th>Interest on Stake</th>
+      <th>New Stake</th><th>Staked Balance</th><th>Total Balance</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+<div class="pagination" id="pagination"></div>
 
 <script>
 let tableData = [];
@@ -100,7 +130,6 @@ let rowsPerPage = 50;
 let currentPage = 1;
 const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
-// Set start date to today automatically
 document.addEventListener('DOMContentLoaded', () => {
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('startDate').value = today;
@@ -195,8 +224,6 @@ function calculate(){
     });
   }
 
-  // update summary with animation
-  document.getElementById('summary').style.display='block';
   document.getElementById('dayCount').innerText=earningDays;
   animateCounter('totalEarnings', 0, totalEarnings, 1000);
   animateCounter('totalBalance', 0, initialAmount+stakedBalance, 1000);
@@ -213,7 +240,6 @@ function renderTable(){
   const end=start+rowsPerPage;
   const page=tableData.slice(start,end);
 
-  // determine max balance for gradient scaling
   const maxBalance = Math.max(...tableData.map(r=>r.total));
 
   page.forEach(r=>{
