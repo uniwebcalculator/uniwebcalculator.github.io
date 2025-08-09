@@ -1,384 +1,459 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>UNIWEB Compounding Calculator</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-<style>
-  body {
-    font-family: 'Roboto', sans-serif;
-    margin: 0;
-    background: linear-gradient(145deg, #0a0f24, #03142f 80%);
-    color: #e0e8ff;
-  }
-  h2 {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 1.4rem;
-    text-align: center;
-    padding: 12px;
-    color: #4fc3ff;
-    text-shadow: 0 0 12px #007bff;
-    margin: 0;
-  }
-  .container {
-    max-width: 1000px;
-    margin: 10px auto;
-    padding: 12px;
-  }
-  .summary-cards {
-    display: flex;
-    justify-content: space-around;
-    margin-bottom: 12px;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .card {
-    background: linear-gradient(135deg, #0047ab, #008bff);
-    color: white;
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-weight: 600;
-    flex: 1;
-    text-align: center;
-    min-width: 90px;
-    font-size: 0.85rem;
-    box-shadow: 0 0 12px rgba(0, 198, 255, 0.4);
-  }
-  .card span {
-    display: inline-block;
-    transition: text-shadow 0.3s ease;
-  }
-  .card span.glow {
-    text-shadow: 0 0 12px #00c6ff, 0 0 20px #00c6ff;
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UNIWEB Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      margin: 16px auto;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #f9fbfd;
+      color: #1a2a47;
+      max-width: 920px;
+      line-height: 1.3;
+    }
+    h2 {
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: #00509e;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .top-dashboard {
+      display: flex;
+      justify-content: flex-start;
+      color: #004080;
+      font-weight: 700;
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+      user-select: none;
+      gap: 48px;
+      flex-wrap: wrap;
+    }
+    .top-dashboard > div {
+      min-width: 150px;
+      text-align: center;
+      border-bottom: 2px solid transparent;
+      padding-bottom: 4px;
+      color: #003060;
+      flex: 1 1 auto;
+    }
+    .top-dashboard > div span {
+      display: block;
+      margin-top: 4px;
+      font-size: 1.4rem;
+      color: #0074d9;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
 
-  /* Compact form row */
-  .form-compact {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    margin-bottom: 8px;
-  }
-  .form-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(10,20,40,0.4);
-    padding: 4px 8px;
-    border-radius: 6px;
-    flex: 1;
-    min-width: 150px;
-  }
-  .form-item label {
-    font-size: 0.75rem;
-    color: #cce6ff;
-    white-space: nowrap;
-  }
-  .form-item input {
-    flex: 1;
-    padding: 4px 6px;
-    font-size: 0.85rem;
-    background: #0b132d;
-    border: 1px solid #2d4b7c;
-    border-radius: 4px;
-    color: #e0e8ff;
-  }
-  .form-item input:focus {
-    outline: none;
-    box-shadow: 0 0 6px #4fc3ff;
-    border-color: #4fc3ff;
-  }
+    /* Inputs container */
+    .input-container {
+      display: flex;
+      gap: 12px;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 4px;
+      padding: 0 4px;
+    }
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1 1 auto;
+      min-width: 0;
+      max-width: 220px;
+    }
+    .input-group.horizontal {
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+    }
+    .input-group.horizontal label {
+      width: 85px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: #004080;
+      white-space: nowrap;
+      user-select: none;
+      text-align: right;
+    }
 
-  button {
-    padding: 6px 12px;
-    margin-top: 6px;
-    font-size: 0.85rem;
-    background: linear-gradient(90deg, #007bff, #00c6ff);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: 0.3s;
-    box-shadow: 0 0 10px rgba(0, 198, 255, 0.4);
-    flex: 1;
-  }
-  button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 0 15px rgba(0, 198, 255, 0.7);
-  }
+    input[type="number"],
+    input[type="date"] {
+      font-size: 0.9rem;
+      padding: 6px 8px;
+      border: 1.5px solid #0074d9;
+      border-radius: 5px;
+      color: #1a2a47;
+      transition: border-color 0.25s ease;
+      width: 180px;  /* uniform width for all inputs */
+      box-sizing: border-box;
+    }
+    input[type="number"]:focus,
+    input[type="date"]:focus {
+      outline: none;
+      border-color: #004080;
+      box-shadow: 0 0 6px rgba(0, 116, 217, 0.3);
+    }
 
-  #dailyRateBox, #bonusBox {
-    font-weight: bold;
-    font-size: 0.8rem;
-    margin-top: 4px;
-    text-shadow: 0 0 6px #007bff;
-  }
-  #dailyRateBox { color: #00ffcc; }
-  #bonusBox { color: #4fc3ff; }
+    /* Stats line: Earning days, Bonus */
+    .stats-line {
+      display: flex;
+      gap: 16px;
+      margin: 12px 4px 24px 4px;
+      max-width: 460px;
+      user-select: none;
+      flex-wrap: wrap;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: #004080;
+    }
+    .stats-line > div {
+      background: #d9e8fc;
+      padding: 6px 14px;
+      border-radius: 12px;
+      box-shadow: inset 0 0 6px rgba(0,116,217,0.1);
+      white-space: nowrap;
+      min-width: 130px;
+      text-align: center;
+      color: #003366;
+    }
 
-  .table-container {
-    width: 100%;
-    overflow-x: auto;
-    margin-top: 10px;
-    border-radius: 6px;
-    box-shadow: 0 0 10px rgba(0, 198, 255, 0.2);
-  }
-  table {
-    border-collapse: collapse;
-    width: 100%;
-    min-width: 700px;
-    background: rgba(10, 20, 40, 0.95);
-    color: #e0e8ff;
-    font-size: 0.75rem;
-  }
-  th, td {
-    padding: 6px;
-    text-align: center;
-    border: 1px solid #2d4b7c;
-  }
-  th {
-    background: linear-gradient(90deg, #0047ab, #00bfff);
-    color: white;
-    font-weight: 600;
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    text-shadow: 0 0 6px #007bff;
-    font-size: 0.75rem;
-  }
-  tr.earning-row {
-    background: rgba(0, 191, 255, 0.08);
-  }
-  tr.sunday {
-    background-color: rgba(60, 60, 60, 0.25) !important;
-    color: #777;
-  }
-  .bonus-row {
-    background-color: rgba(0, 198, 255, 0.15) !important;
-    font-weight: bold;
-    text-shadow: 0 0 4px #00c6ff;
-  }
+    button {
+      display: block;
+      width: 100%;
+      max-width: 360px;
+      margin: 0 auto 32px;
+      padding: 10px 0;
+      background-color: #0074d9;
+      color: #fff;
+      font-weight: 700;
+      font-size: 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.25s ease;
+      user-select: none;
+      letter-spacing: 0.02em;
+    }
+    button:hover {
+      background-color: #005aab;
+    }
+    .table-container {
+      overflow-x: auto;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 3px 10px rgba(0,116,217,0.1);
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 600px;
+      font-size: 0.85rem;
+    }
+    thead tr {
+      background-color: #0074d9;
+      color: white;
+      font-weight: 700;
+    }
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #dbe9ff;
+      text-align: center;
+      white-space: nowrap;
+    }
+    tbody tr:nth-child(even) {
+      background-color: #f7faff;
+    }
+    tbody tr.bonus-row {
+      background-color: #daf1da !important;
+      font-weight: 700;
+      color: #006400;
+    }
+    tbody tr.sunday-row {
+      background-color: #fdecea !important;
+      color: #a70000;
+      font-weight: 600;
+    }
 
-  /* Row animation */
-  tbody tr {
-    opacity: 0;
-    transform: translateY(10px);
-    transition: opacity 0.4s ease, transform 0.4s ease;
-  }
-  tbody tr.show {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  #backToTop {
-    display: none;
-    position: fixed;
-    bottom: 12px;
-    right: 12px;
-    z-index: 99;
-    font-size: 16px;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: none;
-    outline: none;
-    color: white;
-    cursor: pointer;
-    background: linear-gradient(135deg,#007bff,#00c6ff);
-    box-shadow: 0 0 8px rgba(0,198,255,0.5);
-    opacity: 0.7;
-    transition: all 0.3s ease;
-  }
-  #backToTop:hover { opacity: 1; transform: scale(1.05); }
-  @media (max-width: 600px) {
-    h2 { font-size: 1.1rem; }
-    .card { font-size: 0.7rem; padding: 6px; }
-    .form-compact { flex-direction: column; }
-    .form-item { width: 100%; }
-    button { width: 100%; }
-  }
-</style>
+    @media (max-width: 720px) {
+      body {
+        margin: 12px 10px;
+      }
+      h2 {
+        font-size: 1.3rem;
+      }
+      .top-dashboard {
+        justify-content: center;
+        gap: 14px;
+      }
+      .top-dashboard > div {
+        min-width: 140px;
+        flex: 1 1 45%;
+      }
+      .input-container {
+        gap: 10px;
+      }
+      .input-group {
+        max-width: 100%;
+        flex: 1 1 100%;
+      }
+      .input-group.horizontal label {
+        width: auto;
+        text-align: left;
+      }
+      /* stack info-line on small */
+      .stats-line {
+        max-width: 100%;
+        flex-direction: column;
+        gap: 8px;
+      }
+      button {
+        max-width: 100%;
+        font-size: 1.1rem;
+        padding: 12px 0;
+      }
+      table {
+        font-size: 0.9rem;
+        min-width: 500px;
+      }
+      input[type="number"],
+      input[type="date"] {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
 
 <h2>UNIWEB Calculator</h2>
 
-<div class="container">
-  <div class="summary-cards">
-    <div class="card">Earning Days: <span id="earningDayCount">0</span></div>
-    <div class="card">Staked: $<span id="stakedCount">0.0000</span></div>
-    <div class="card">Total: $<span id="totalCount">0.00</span></div>
+<div class="top-dashboard" aria-label="Dashboard summary">
+  <div>
+    Staking Balance
+    <span id="stakedAmount">$0.00</span>
   </div>
-
-  <div class="form-compact">
-    <div class="form-item">
-      <label for="startDate">Start:</label>
-      <input type="date" id="startDate" />
-    </div>
-    <div class="form-item">
-      <label for="initialAmount">Amount $:</label>
-      <input type="number" id="initialAmount" min="1" value="100" oninput="updateBonus();" />
-    </div>
-    <div class="form-item">
-      <label for="earningDays">Days:</label>
-      <input type="number" id="earningDays" min="1" value="30" />
-    </div>
+  <div>
+    Total Balance
+    <span id="totalBalance">$0.00</span>
   </div>
-
-  <div id="dailyRateBox">Daily Rate: 2.00%</div>
-  <div id="bonusBox">Bonus: $5.00 (5% of initial amount)</div>
-
-  <div class="form-compact" style="margin-top:6px;">
-    <button onclick="generateTable()">Calculate</button>
-  </div>
-
-  <div class="table-container" id="results"></div>
 </div>
 
-<button id="backToTop" title="Go to top">↑</button>
+<div class="input-container" role="form" aria-label="Calculator input form">
+  <div class="input-group horizontal">
+    <label for="startDate">Start Date:</label>
+    <input type="date" id="startDate" aria-required="true" />
+  </div>
+  <div class="input-group horizontal">
+    <label for="initialAmount">Amount ($):</label>
+    <input type="number" id="initialAmount" min="1" value="100" aria-required="true" />
+  </div>
+  <div class="input-group horizontal">
+    <label for="daysInput">No. of Days:</label>
+    <input type="number" id="daysInput" min="1" value="30" aria-required="true" />
+  </div>
+  <div class="input-group horizontal">
+    <label for="dailyRateInput">Daily Rate %:</label>
+    <input type="number" id="dailyRateInput" step="0.01" min="0" aria-required="true" />
+  </div>
+</div>
+
+<div class="stats-line" aria-live="polite" aria-atomic="true">
+  <div id="actualEarningDays">Earning Days (excluding Sundays): 0</div>
+  <div id="bonusInfo">Bonus: $0.00 (5% of initial)</div>
+</div>
+
+<button type="button" onclick="calculate()">Calculate</button>
+
+<div class="table-container" aria-label="Earnings breakdown table" style="margin-bottom: 32px;">
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Day</th>
+        <th>Day #</th>
+        <th>Daily Fixed Earning</th>
+        <th>Interest on Stake</th>
+        <th>New Stake</th>
+        <th>Staked Balance</th>
+      </tr>
+    </thead>
+    <tbody id="resultsTableBody"></tbody>
+  </table>
+</div>
 
 <script>
-let tableData = [];
-let prevEarningDays = 0, prevStaked = 0, prevTotal = 0;
+  const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
-function getDailyRate(amount) {
-  return amount >= 100 ? 0.02 : 0.015;
-}
-
-function updateBonus() {
-  const initialAmount = parseFloat(document.getElementById('initialAmount').value) || 0;
-  const bonus = initialAmount * 0.05;
-  const rate = getDailyRate(initialAmount) * 100;
-  document.getElementById('bonusBox').innerText =
-    `Bonus: $${bonus.toFixed(2)} (5% of initial amount)`;
-  document.getElementById('dailyRateBox').innerText =
-    `Daily Rate: ${rate.toFixed(2)}%`;
-}
-
-function animateValue(id, start, end, duration, decimals = 0) {
-  const element = document.getElementById(id);
-  element.classList.add("glow");
-  setTimeout(() => element.classList.remove("glow"), 800);
-  
-  let startTime = null;
-  function animate(currentTime) {
-    if (!startTime) startTime = currentTime;
-    const progress = Math.min((currentTime - startTime) / duration, 1);
-    const value = start + (end - start) * progress;
-    element.innerText = value.toFixed(decimals);
-    if (progress < 1) requestAnimationFrame(animate);
+  function getRate(amount) {
+    if (amount >= 35000) return 0.035;
+    if (amount >= 25000) return 0.0325;
+    if (amount >= 17000) return 0.03;
+    if (amount >= 10000) return 0.0275;
+    if (amount >= 5000) return 0.026;
+    if (amount >= 2500) return 0.025;
+    if (amount >= 1000) return 0.023;
+    if (amount >= 300) return 0.0215;
+    if (amount >= 100) return 0.02;
+    if (amount >= 20) return 0.015;
+    return 0;
   }
-  requestAnimationFrame(animate);
-}
 
-// Default today
-document.getElementById('startDate').valueAsDate = new Date();
+  function updateDailyRateInput() {
+    const initialAmount = parseFloat(document.getElementById('initialAmount').value) || 0;
+    const calculatedRate = getRate(initialAmount) * 100;
+    const dailyRateInput = document.getElementById('dailyRateInput');
 
-function generateTable() {
-  const startDateInput = document.getElementById('startDate').value;
-  if (!startDateInput) { alert('Please select a start date'); return; }
-
-  const initialAmount = parseFloat(document.getElementById('initialAmount').value);
-  const totalDays = parseInt(document.getElementById('earningDays').value);
-  const startDate = new Date(startDateInput);
-  const bonus = initialAmount * 0.05;
-  const dayNames = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-
-  tableData = [];
-  let stakedBalance = 0;
-  let earningDayCount = 0;
-
-  for (let day = 0; day < totalDays; day++) {
-    let currentDate = new Date(startDate);
-    currentDate.setDate(startDate.getDate() + day);
-
-    let dayOfWeek = currentDate.getDay();
-    let fixedEarning = 0, interest = 0, bonusToday = 0;
-    let rateToday = getDailyRate(initialAmount);
-
-    if (day === 0) {
-      bonusToday = bonus;
-      earningDayCount++;
-    } else if (dayOfWeek !== 0) {
-      fixedEarning = initialAmount * rateToday;
-      interest = stakedBalance * rateToday;
-      earningDayCount++;
+    if (dailyRateInput.hasAttribute('readonly')) {
+      dailyRateInput.value = calculatedRate.toFixed(2);
     }
+  }
 
-    let newStake = fixedEarning + interest + bonusToday;
-    if (day === 0 || dayOfWeek !== 0) {
+  function updateBonusInfo() {
+    const initialAmount = parseFloat(document.getElementById('initialAmount').value) || 0;
+    const bonusAmount = initialAmount * 0.05;
+    document.getElementById('bonusInfo').textContent = `Bonus: ${currency.format(bonusAmount)} (5% of initial)`;
+  }
+
+  function countSundays(startDate, totalDays) {
+    let sundays = 0;
+    for(let i=0; i<totalDays; i++) {
+      let d = new Date(startDate);
+      d.setDate(d.getDate() + i);
+      if(d.getDay() === 0) sundays++;
+    }
+    return sundays;
+  }
+
+  function animateValue(id, start, end, duration = 800) {
+    const el = document.getElementById(id);
+    const range = end - start;
+    let startTime = null;
+    function step(timestamp) {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      const val = start + progress * range;
+      el.textContent = currency.format(val);
+      if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  function calculate() {
+    const startDateStr = document.getElementById('startDate').value;
+    const initialAmount = parseFloat(document.getElementById('initialAmount').value);
+    const daysInput = parseInt(document.getElementById('daysInput').value);
+    let dailyRate = parseFloat(document.getElementById('dailyRateInput').value);
+
+    if (!startDateStr) {
+      alert('Please select a start date.');
+      return;
+    }
+    if (isNaN(initialAmount) || initialAmount <= 0) {
+      alert('Please enter a valid initial amount.');
+      return;
+    }
+    if (isNaN(daysInput) || daysInput <= 0) {
+      alert('Please enter a valid number of days.');
+      return;
+    }
+    if (isNaN(dailyRate) || dailyRate < 0) {
+      alert('Please enter a valid daily rate.');
+      return;
+    }
+    dailyRate = dailyRate / 100; // convert percentage to decimal
+
+    const bonusAmount = initialAmount * 0.05;
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const startDate = new Date(startDateStr);
+
+    let sundaysCount = countSundays(startDate, daysInput);
+    let earningDaysCount = daysInput - sundaysCount;
+
+    document.getElementById('actualEarningDays').textContent =
+      `Earning Days (excluding Sundays): ${earningDaysCount}`;
+
+    const resultsBody = document.getElementById('resultsTableBody');
+    resultsBody.innerHTML = '';
+
+    let totalEarnings = 0;
+    let stakedBalance = 0;
+
+    for(let i=0; i < daysInput; i++) {
+      const currentDate = new Date(startDate);
+      currentDate.setDate(startDate.getDate() + i);
+      const dow = currentDate.getDay();
+      const isSunday = dow === 0;
+
+      let fixed = 0, interest = 0, bonusToday = 0;
+
+      if(i === 0) {
+        bonusToday = bonusAmount;
+      } else if(!isSunday) {
+        fixed = initialAmount * dailyRate;
+        interest = stakedBalance * dailyRate;
+      }
+
+      const newStake = fixed + interest + bonusToday;
       stakedBalance += newStake;
+
+      if(!isSunday) totalEarnings += newStake;
+
+      const tr = document.createElement('tr');
+      if(bonusToday > 0) tr.classList.add('bonus-row');
+      if(isSunday) tr.classList.add('sunday-row');
+
+      tr.innerHTML = `
+        <td>${currentDate.toISOString().slice(0,10)}</td>
+        <td>${dayNames[dow]}</td>
+        <td>${i + 1}</td>
+        <td>${currency.format(fixed)}</td>
+        <td>${currency.format(interest)}</td>
+        <td>${currency.format(newStake)}</td>
+        <td>${currency.format(stakedBalance)}</td>
+      `;
+      resultsBody.appendChild(tr);
     }
 
-    let totalBalance = initialAmount + stakedBalance;
+    animateValue('stakedAmount', 0, stakedBalance);
+    animateValue('totalBalance', 0, initialAmount + stakedBalance);
 
-    tableData.push({
-      date: currentDate.toISOString().slice(0,10),
-      dayName: dayNames[dayOfWeek],
-      dayNumber: day+1,
-      fixedEarning: fixedEarning.toFixed(2),
-      interest: interest.toFixed(4),
-      newStake: newStake.toFixed(4),
-      stakedBalance: stakedBalance.toFixed(4),
-      totalBalance: totalBalance.toFixed(2),
-      isBonus: day===0,
-      isSunday: dayOfWeek===0
-    });
+    updateBonusInfo();
   }
 
-  animateValue("earningDayCount", prevEarningDays, earningDayCount, 800, 0);
-  animateValue("stakedCount", prevStaked, stakedBalance, 1000, 4);
-  animateValue("totalCount", prevTotal, initialAmount + stakedBalance, 1000, 2);
+  window.onload = () => {
+    const dailyRateInput = document.getElementById('dailyRateInput');
 
-  prevEarningDays = earningDayCount;
-  prevStaked = stakedBalance;
-  prevTotal = initialAmount + stakedBalance;
+    dailyRateInput.setAttribute('readonly', 'readonly');
+    updateDailyRateInput();
+    updateBonusInfo();
 
-  renderTable();
-}
+    document.getElementById('startDate').valueAsDate = new Date();
 
-function renderTable() {
-  let html = '<table><thead><tr>' +
-    '<th>Date</th><th>Day</th><th>#</th>' +
-    '<th>Fixed Earning</th><th>Interest</th><th>New Stake</th>' +
-    '<th>Staked Balance</th><th>Total Balance</th>' +
-    '</tr></thead><tbody>';
+    document.getElementById('initialAmount').addEventListener('input', () => {
+      updateDailyRateInput();
+      updateBonusInfo();
+    });
+    document.getElementById('daysInput').addEventListener('input', () => {
+      updateDailyRateInput();
+    });
 
-  tableData.forEach(row => {
-    let cls = row.isSunday ? 'sunday' : (row.isBonus ? 'bonus-row earning-row' : 'earning-row');
-    html += `<tr class="${cls}">` +
-      `<td>${row.date}</td>` +
-      `<td>${row.dayName}</td>` +
-      `<td>${row.dayNumber}</td>` +
-      `<td>${row.fixedEarning}</td>` +
-      `<td>${row.interest}</td>` +
-      `<td>${row.newStake}</td>` +
-      `<td>${row.stakedBalance}</td>` +
-      `<td>${row.totalBalance}</td>` +
-      `</tr>`;
-  });
+    dailyRateInput.addEventListener('focus', () => {
+      dailyRateInput.removeAttribute('readonly');
+    });
 
-  html += '</tbody></table>';
-  document.getElementById('results').innerHTML = html;
-
-  // Animate rows
-  const rows = document.querySelectorAll('#results tbody tr');
-  rows.forEach((row, i) => {
-    setTimeout(() => row.classList.add('show'), i * 40);
-  });
-}
-
-// Back to top
-let backToTopBtn = document.getElementById("backToTop");
-window.onscroll = function() {
-  backToTopBtn.style.display =
-    (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) ? "block" : "none";
-};
-backToTopBtn.onclick = () => window.scrollTo({top: 0, behavior: 'smooth'});
-
-updateBonus();
+    dailyRateInput.addEventListener('blur', () => {
+      const val = parseFloat(dailyRateInput.value);
+      if (isNaN(val) || val < 0) {
+        dailyRateInput.setAttribute('readonly', 'readonly');
+        updateDailyRateInput();
+      }
+    });
+  };
 </script>
 
 </body>
