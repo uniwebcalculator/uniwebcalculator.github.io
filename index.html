@@ -15,7 +15,23 @@
     .input-group.horizontal { display: flex; align-items: center; gap: 8px; }
     .input-group.horizontal label { flex: 0 0 110px; font-weight: 600; font-size: 0.85rem; color: #004080; white-space: nowrap; text-align: left; padding-left: 4px; }
     input[type="number"], input[type="date"] { font-size: 0.85rem; padding: 6px 8px; border: 1.5px solid #0074d9; border-radius: 5px; width: 100%; }
-    .stats-line { display: flex; justify-content: space-between; margin: 12px 4px 20px 4px; flex-wrap: wrap; font-weight: 600; font-size: 0.85rem; color: #004080; }
+    
+    .stats-line { 
+      display: flex; 
+      justify-content: space-between; 
+      margin: 12px 4px 20px 4px; 
+      flex-wrap: wrap; 
+      font-weight: 600; 
+      font-size: 0.85rem; 
+      color: #004080; 
+    }
+    #actualEarningDays {
+      color: #008000; /* green */
+    }
+    #bonusInfo {
+      color: #008000; /* green */
+    }
+
     .btn-row { display: flex; justify-content: center; gap: 12px; margin-bottom: 24px; }
     button { padding: 10px 0; background-color: #0074d9; color: #fff; font-weight: 700; font-size: 1rem; border: none; border-radius: 6px; cursor: pointer; min-width: 150px; }
     button:hover:enabled { background-color: #005aab; }
@@ -35,7 +51,7 @@
     #resultsTable th:nth-child(2), #resultsTable td:nth-child(2) { width: 65px; padding: 4px; font-size: 0.75rem; }
     th { white-space: normal; max-width: 90px; font-size: 0.75rem; line-height: 1.1rem; }
 
-    /* Remove any accidental top rounding on header cells */
+    /* Remove top rounding on header cells */
     thead tr:first-child th:first-child { border-top-left-radius: 0; }
     thead tr:first-child th:last-child { border-top-right-radius: 0; }
 
