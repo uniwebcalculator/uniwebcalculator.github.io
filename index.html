@@ -20,15 +20,29 @@
     button { padding: 10px 0; background-color: #0074d9; color: #fff; font-weight: 700; font-size: 1rem; border: none; border-radius: 6px; cursor: pointer; min-width: 150px; }
     button:hover:enabled { background-color: #005aab; }
     button:disabled { opacity: 0.45; cursor: not-allowed; }
-    .table-container { overflow-x: auto; background: #fff; border-radius: 8px; box-shadow: 0 3px 10px rgba(0,116,217,0.1); }
+
+    /* Table container with straight top and rounded bottom */
+    .table-container {
+      overflow-x: auto;
+      background: #fff;
+      border-radius: 0 0 8px 8px; /* straight top, rounded bottom */
+      box-shadow: 0 3px 10px rgba(0,116,217,0.1);
+    }
+
     table { border-collapse: collapse; width: 100%; font-size: 0.75rem; table-layout: fixed; }
     thead tr { background-color: #0074d9; color: white; }
     th, td { padding: 6px 6px; border-bottom: 1px solid #dbe9ff; text-align: center; word-wrap: white-space: normal; }
     #resultsTable th:nth-child(2), #resultsTable td:nth-child(2) { width: 65px; padding: 4px; font-size: 0.75rem; }
     th { white-space: normal; max-width: 90px; font-size: 0.75rem; line-height: 1.1rem; }
+
+    /* Remove any accidental top rounding on header cells */
+    thead tr:first-child th:first-child { border-top-left-radius: 0; }
+    thead tr:first-child th:last-child { border-top-right-radius: 0; }
+
     tbody tr:nth-child(even) { background-color: #f7faff; }
     tbody tr.bonus-row { background-color: #daf1da !important; font-weight: 700; color: #006400; }
     tbody tr.sunday-row td:nth-child(2) { color: red !important; font-weight: bold; }
+
     @media (max-width: 720px) { table { font-size: 0.7rem; } th, td { padding: 4px; } }
   </style>
 </head>
