@@ -4,18 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>UNIWEB Calculator</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet"/>
   <style>
-    /* --- ORIGINAL STYLES (unchanged) --- */
     body {
       margin: 16px auto;
-      font-family: 'Inter', system-ui, sans-serif;
+      font-family: 'Roboto', system-ui, sans-serif;
       background: #f9fbfd;
       color: #1a2a47;
       max-width: 920px;
       line-height: 1.3;
     }
     h2 {
+      font-family: 'Orbitron', sans-serif;
       font-weight: 700;
       font-size: 1.5rem;
       color: #00509e;
@@ -49,8 +49,6 @@
       font-weight: 800;
       letter-spacing: -0.02em;
     }
-
-    /* Inputs container */
     .input-container {
       display: flex;
       gap: 12px;
@@ -82,16 +80,15 @@
       user-select: none;
       text-align: right;
     }
-
     input[type="number"],
     input[type="date"] {
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       padding: 6px 8px;
       border: 1.5px solid #0074d9;
       border-radius: 5px;
       color: #1a2a47;
       transition: border-color 0.25s ease;
-      width: 180px;  /* uniform width for all inputs */
+      width: 180px;
       box-sizing: border-box;
     }
     input[type="number"]:focus,
@@ -100,8 +97,6 @@
       border-color: #004080;
       box-shadow: 0 0 6px rgba(0, 116, 217, 0.3);
     }
-
-    /* Stats line: Earning days, Bonus */
     .stats-line {
       display: flex;
       gap: 16px;
@@ -123,12 +118,14 @@
       text-align: center;
       color: #003366;
     }
-
+    .btn-row {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
     button {
       display: block;
-      width: 100%;
-      max-width: 360px;
-      margin: 0 auto 32px;
       padding: 10px 0;
       background-color: #0074d9;
       color: #fff;
@@ -140,10 +137,10 @@
       transition: background-color 0.25s ease;
       user-select: none;
       letter-spacing: 0.02em;
+      min-width: 150px;
     }
-    button:hover {
-      background-color: #005aab;
-    }
+    button:hover:enabled { background-color: #005aab; }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
     .table-container {
       overflow-x: auto;
       background: #fff;
@@ -156,472 +153,343 @@
       min-width: 600px;
       font-size: 0.85rem;
     }
-    thead tr {
-      background-color: #0074d9;
-      color: white;
-      font-weight: 700;
-    }
+    thead tr { background-color: #0074d9; color: white; font-weight: 700; }
     th, td {
       padding: 10px 12px;
       border-bottom: 1px solid #dbe9ff;
       text-align: center;
       white-space: nowrap;
     }
-    tbody tr:nth-child(even) {
-      background-color: #f7faff;
-    }
-    tbody tr.bonus-row {
-      background-color: #daf1da !important;
-      font-weight: 700;
-      color: #006400;
-    }
+    tbody tr:nth-child(even) { background-color: #f7faff; }
+    tbody tr.bonus-row { background-color: #daf1da !important; font-weight: 700; color: #006400; }
+    tbody tr.sunday-row { background-color: rgba(128,128,128,0.12) !important; color: grey !important; font-weight: 500; }
+    tbody tr.sunday-row td { color: grey !important; }
 
-    /* === SUNDAY ROW (MINIMAL SAFE CHANGE) ===
-       We force the entire Sunday row + its table cells to grey text in both modes.
-       This includes cell-specific selectors to override body.dark th,td color.
-    */
-    tbody tr.sunday-row {
-      background-color: rgba(128,128,128,0.12) !important;
-      color: grey !important;
-      font-weight: 500;
-    }
-    /* ensure every cell in the row uses grey text (stronger specificity) */
-    tbody tr.sunday-row td {
-      color: grey !important;
-    }
-
+    /* Compact mobile view */
     @media (max-width: 720px) {
-      body {
-        margin: 12px 10px;
-      }
-      h2 {
-        font-size: 1.3rem;
-      }
-      .top-dashboard {
-        justify-content: center;
-        gap: 14px;
-      }
-      .top-dashboard > div {
-        min-width: 140px;
-        flex: 1 1 45%;
-      }
-      .input-container {
-        gap: 10px;
-      }
-      .input-group {
-        max-width: 100%;
-        flex: 1 1 100%;
-      }
-      .input-group.horizontal label {
-        width: auto;
-        text-align: left;
-      }
-      /* stack info-line on small */
-      .stats-line {
-        max-width: 100%;
-        flex-direction: column;
-        gap: 8px;
-      }
-      button {
-        max-width: 100%;
-        font-size: 1.1rem;
-        padding: 12px 0;
-      }
-      table {
-        font-size: 0.9rem;
-        min-width: 500px;
-      }
-      input[type="number"],
-      input[type="date"] {
-        width: 100%;
-      }
+      body { margin: 8px 6px; }
+      h2 { font-size: 1.2rem; margin-bottom: 12px; }
+      .top-dashboard { justify-content: center; gap: 8px; font-size: 0.8rem; }
+      .top-dashboard > div span { font-size: 1.1rem; }
+
+      .input-container { gap: 8px; }
+      .input-group { max-width: 100%; flex: 1 1 100%; }
+      .input-group.horizontal label { width: auto; text-align: left; font-size: 0.8rem; }
+
+      .stats-line { max-width: 100%; flex-direction: column; gap: 6px; font-size: 0.8rem; }
+      button { max-width: 100%; font-size: 0.95rem; padding: 8px 0; }
+
+      table { font-size: 0.75rem; min-width: unset; }
+      th, td { padding: 4px 6px; white-space: normal; }
     }
 
-    /* --- THEME TOGGLE (ADDED ONLY) --- */
-    /* small slider in top-right; doesn't change layout or other rules */
-    .theme-toggle {
-      position: absolute;
-      top: 12px;
-      right: 14px;
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.95rem;
-      user-select: none;
-    }
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: 36px;
-      height: 20px;
-    }
-    .switch input { opacity: 0; width: 0; height: 0; }
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      inset: 0;
-      background: #d1d5db;
-      transition: 0.24s;
-      border-radius: 999px;
-      box-shadow: inset 0 -1px 1px rgba(0,0,0,0.08);
-    }
-    .slider:before {
-      content: "";
-      position: absolute;
-      height: 16px;
-      width: 16px;
-      left: 2px;
-      bottom: 2px;
-      background: #fff;
-      border-radius: 50%;
-      transition: 0.24s;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.12);
-    }
-    .switch input:checked + .slider {
-      background: #00bfff;
-    }
-    .switch input:checked + .slider:before {
-      transform: translateX(16px);
-    }
-
-    /* --- LIGHT by default; dark mode overrides only (no layout changes) --- */
-    /* When body has class 'dark', only colors below are overridden */
-    body.dark {
-      background: linear-gradient(180deg,#071026 0%, #07142a 100%);
-      color: #dbeeff;
-    }
-    body.dark h2 {
-      color: #3ecbff;
-      text-shadow: 0 0 6px rgba(62,203,255,0.08);
-    }
-    body.dark .top-dashboard { color: #bfe9ff; }
-    body.dark .top-dashboard > div { color: #cfeeff; }
-    body.dark .top-dashboard > div span { color: #00bfff; }
-
-    body.dark .input-group.horizontal label { color: #9fd9ff; }
-    body.dark input[type="number"],
-    body.dark input[type="date"] {
-      background: #071826;
-      border-color: #00bfff;
-      color: #e6f7ff;
-      box-shadow: inset 0 0 6px rgba(0,191,255,0.03);
-    }
-    body.dark input[type="number"]:focus,
-    body.dark input[type="date"]:focus {
-      box-shadow: 0 0 8px rgba(0,191,255,0.18);
-      border-color: #66d9ff;
-    }
-
-    body.dark .stats-line > div {
-      background: linear-gradient(90deg,#0b2233,#07202b);
-      color: #cfeeff;
-      box-shadow: inset 0 0 6px rgba(0,191,255,0.03);
-    }
-
-    body.dark button {
-      background: linear-gradient(90deg,#0066ff,#00bfff);
-      color: #fff;
-      box-shadow: 0 6px 22px rgba(0,191,255,0.08);
-    }
-    body.dark button:hover { background: linear-gradient(90deg,#0056dd,#00aee6); }
-
-    body.dark .table-container {
-      background: #071122;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.6);
-    }
-    body.dark thead tr { background-color: #003a6b; }
-    body.dark th, body.dark td {
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-      color: #dbeeff;
-    }
-    body.dark tbody tr:nth-child(even) {
-      background-color: rgba(255,255,255,0.02);
-    }
-    body.dark tbody tr.bonus-row {
-      background-color: rgba(0,255,128,0.06) !important;
-      color: #9fffd6;
-    }
-
-    /* To be safe, also force cell text grey for sunday rows in dark mode (stronger selector) */
-    body.dark tbody tr.sunday-row,
-    body.dark tbody tr.sunday-row td {
-      background-color: rgba(128,128,128,0.15) !important;
-      color: grey !important;
-      font-weight: 500;
-    }
-
-    /* end added section */
+    
   </style>
 </head>
 <body>
 
-  <!-- THEME TOGGLE (only new element) -->
-  <div class="toggle-container">
-  ☀️
-  <label class="switch">
-    <input type="checkbox" id="themeToggle">
-    <span class="slider"></span>
-  </label>
-  🌙
-</div>
+  <h2>UNIWEB Calculator</h2>
 
-<h2>UNIWEB Calculator</h2>
-
-<div class="top-dashboard" aria-label="Dashboard summary">
-  <div>
-    Staking Balance
-    <span id="stakedAmount">$0.00</span>
+  <div class="top-dashboard" aria-label="Dashboard summary">
+    <div>Staking Balance <span id="stakedAmount">$0.00</span></div>
+    <div>Total Balance <span id="totalBalance">$0.00</span></div>
   </div>
-  <div>
-    Total Balance
-    <span id="totalBalance">$0.00</span>
+
+  <div class="input-container" role="form" aria-label="Calculator input form">
+    <div class="input-group horizontal">
+      <label for="startDate">Start Date:</label>
+      <input type="date" id="startDate" aria-required="true" />
+    </div>
+    <div class="input-group horizontal">
+      <label for="initialAmount">Amount ($):</label>
+      <input type="number" id="initialAmount" min="1" value="100" aria-required="true" />
+    </div>
+    <div class="input-group horizontal">
+      <label for="daysInput">No. of Days:</label>
+      <input type="number" id="daysInput" min="1" value="30" aria-required="true" />
+    </div>
+    <div class="input-group horizontal">
+      <label for="dailyRateInput">Daily Rate %:</label>
+      <input type="number" id="dailyRateInput" step="0.01" min="0" aria-required="true" />
+    </div>
   </div>
-</div>
 
-<div class="input-container" role="form" aria-label="Calculator input form">
-  <div class="input-group horizontal">
-    <label for="startDate">Start Date:</label>
-    <input type="date" id="startDate" aria-required="true" />
+  <div class="stats-line" aria-live="polite" aria-atomic="true">
+    <div id="actualEarningDays">Earning Days (excluding Sundays): 0</div>
+    <div id="bonusInfo">Bonus: $0.00 (5% of initial)</div>
   </div>
-  <div class="input-group horizontal">
-    <label for="initialAmount">Amount ($):</label>
-    <input type="number" id="initialAmount" min="1" value="100" aria-required="true" />
+
+  <div class="btn-row">
+    <button type="button" id="calculateBtn" onclick="calculate()">Calculate</button>
+    <button type="button" id="exportBtn" onclick="exportToExcel()" disabled>Export to Excel</button>
   </div>
-  <div class="input-group horizontal">
-    <label for="daysInput">No. of Days:</label>
-    <input type="number" id="daysInput" min="1" value="30" aria-required="true" />
+
+  <div class="table-container" aria-label="Earnings breakdown table" style="margin-bottom: 32px;">
+    <table id="resultsTable">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Day</th>
+          <th>Day #</th>
+          <th>Daily Fixed Earning</th>
+          <th>Interest on Stake</th>
+          <th>New Stake</th>
+          <th>Staked Balance</th>
+        </tr>
+      </thead>
+      <tbody id="resultsTableBody"></tbody>
+    </table>
   </div>
-  <div class="input-group horizontal">
-    <label for="dailyRateInput">Daily Rate %:</label>
-    <input type="number" id="dailyRateInput" step="0.01" min="0" aria-required="true" />
-  </div>
-</div>
 
-<div class="stats-line" aria-live="polite" aria-atomic="true">
-  <div id="actualEarningDays">Earning Days (excluding Sundays): 0</div>
-  <div id="bonusInfo">Bonus: $0.00 (5% of initial)</div>
-</div>
+  <!-- SheetJS (use a stable CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
-<button type="button" onclick="calculate()">Calculate</button>
+  <script>
+    const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
-<div class="table-container" aria-label="Earnings breakdown table" style="margin-bottom: 32px;">
-  <table>
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Day</th>
-        <th>Day #</th>
-        <th>Daily Fixed Earning</th>
-        <th>Interest on Stake</th>
-        <th>New Stake</th>
-        <th>Staked Balance</th>
-      </tr>
-    </thead>
-    <tbody id="resultsTableBody"></tbody>
-  </table>
-</div>
-
-<!-- THEME TOGGLE SCRIPT (tiny, non-invasive) -->
-<script>
-  (function() {
-    const toggle = document.getElementById('themeToggle');
-    // Load saved theme; default = LIGHT (i.e., no 'dark' class)
-    const saved = localStorage.getItem('uniweb-theme');
-    if (saved === 'dark') {
-      document.body.classList.add('dark');
-      toggle.checked = true;
-      toggle.setAttribute('aria-checked','true');
-      toggle.nextElementSibling.setAttribute('aria-checked','true');
-    } else {
-      // default light: ensure no dark class
-      document.body.classList.remove('dark');
-      toggle.checked = false;
-      toggle.setAttribute('aria-checked','false');
-      if (toggle.nextElementSibling) toggle.nextElementSibling.setAttribute('aria-checked','false');
+    function getRate(amount) {
+      if (amount >= 35000) return 0.035;
+      if (amount >= 25000) return 0.0325;
+      if (amount >= 17000) return 0.03;
+      if (amount >= 10000) return 0.0275;
+      if (amount >= 5000) return 0.026;
+      if (amount >= 2500) return 0.025;
+      if (amount >= 1000) return 0.023;
+      if (amount >= 300) return 0.0215;
+      if (amount >= 100) return 0.02;
+      if (amount >= 20) return 0.015;
+      return 0;
     }
 
-    // When user toggles, only change theme class + localStorage (no other code)
-    toggle.addEventListener('change', function() {
-      const isDark = !!this.checked;
-      document.body.classList.toggle('dark', isDark);
-      localStorage.setItem('uniweb-theme', isDark ? 'dark' : 'light');
-      this.setAttribute('aria-checked', String(isDark));
-      if (this.nextElementSibling) this.nextElementSibling.setAttribute('aria-checked', String(isDark));
-    });
-  })();
-</script>
-
-<script>
-  /* --- ORIGINAL JAVASCRIPT (unchanged) --- */
-  const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
-
-  function getRate(amount) {
-    if (amount >= 35000) return 0.035;
-    if (amount >= 25000) return 0.0325;
-    if (amount >= 17000) return 0.03;
-    if (amount >= 10000) return 0.0275;
-    if (amount >= 5000) return 0.026;
-    if (amount >= 2500) return 0.025;
-    if (amount >= 1000) return 0.023;
-    if (amount >= 300) return 0.0215;
-    if (amount >= 100) return 0.02;
-    if (amount >= 20) return 0.015;
-    return 0;
-  }
-
-  function updateDailyRateInput() {
-    const initialAmount = parseFloat(document.getElementById('initialAmount').value) || 0;
-    const calculatedRate = getRate(initialAmount) * 100;
-    const dailyRateInput = document.getElementById('dailyRateInput');
-
-    if (dailyRateInput.hasAttribute('readonly')) {
-      dailyRateInput.value = calculatedRate.toFixed(2);
+    function updateDailyRateInput() {
+      const initialAmount = parseFloat(document.getElementById('initialAmount').value) || 0;
+      const calculatedRate = getRate(initialAmount) * 100;
+      const dailyRateInput = document.getElementById('dailyRateInput');
+      if (dailyRateInput.hasAttribute('readonly')) {
+        dailyRateInput.value = calculatedRate.toFixed(2);
+      }
     }
-  }
 
-  function updateBonusInfo() {
-    const initialAmount = parseFloat(document.getElementById('initialAmount').value) || 0;
-    const bonusAmount = initialAmount * 0.05;
-    document.getElementById('bonusInfo').textContent = `Bonus: ${currency.format(bonusAmount)} (5% of initial)`;
-  }
-
-  function countSundays(startDate, totalDays) {
-    let sundays = 0;
-    for(let i=0; i<totalDays; i++) {
-      let d = new Date(startDate);
-      d.setDate(d.getDate() + i);
-      if(d.getDay() === 0) sundays++;
+    function updateBonusInfo() {
+      const initialAmount = parseFloat(document.getElementById('initialAmount').value) || 0;
+      const bonusAmount = initialAmount * 0.05;
+      const el = document.getElementById('bonusInfo');
+      if (el) el.textContent = `Bonus: ${currency.format(bonusAmount)} (5% of initial)`;
     }
-    return sundays;
-  }
 
-  function animateValue(id, start, end, duration = 800) {
-    const el = document.getElementById(id);
-    const range = end - start;
-    let startTime = null;
-    function step(timestamp) {
-      if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / duration, 1);
-      const val = start + progress * range;
-      el.textContent = currency.format(val);
-      if (progress < 1) requestAnimationFrame(step);
+    function countSundays(startDate, totalDays) {
+      let sundays = 0;
+      for (let i = 0; i < totalDays; i++) {
+        let d = new Date(startDate);
+        d.setDate(d.getDate() + i);
+        if (d.getDay() === 0) sundays++;
+      }
+      return sundays;
     }
-    requestAnimationFrame(step);
-  }
 
-  function calculate() {
-    const startDateStr = document.getElementById('startDate').value;
-    const initialAmount = parseFloat(document.getElementById('initialAmount').value);
-    const daysInput = parseInt(document.getElementById('daysInput').value);
-    let dailyRate = parseFloat(document.getElementById('dailyRateInput').value);
-
-    if (!startDateStr) {
-      alert('Please select a start date.');
-      return;
+    function animateValue(id, start, end, duration = 800) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const range = end - start;
+      let startTime = null;
+      function step(timestamp) {
+        if (!startTime) startTime = timestamp;
+        const progress = Math.min((timestamp - startTime) / duration, 1);
+        const val = start + progress * range;
+        el.textContent = currency.format(val);
+        if (progress < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
     }
-    if (isNaN(initialAmount) || initialAmount <= 0) {
-      alert('Please enter a valid initial amount.');
-      return;
-    }
-    if (isNaN(daysInput) || daysInput <= 0) {
-      alert('Please enter a valid number of days.');
-      return;
-    }
-    if (isNaN(dailyRate) || dailyRate < 0) {
-      alert('Please enter a valid daily rate.');
-      return;
-    }
-    dailyRate = dailyRate / 100; // convert percentage to decimal
 
-    const bonusAmount = initialAmount * 0.05;
-    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const startDate = new Date(startDateStr);
+    function calculate() {
+      const startDateStr = document.getElementById('startDate').value;
+      const initialAmount = parseFloat(document.getElementById('initialAmount').value);
+      const daysInput = parseInt(document.getElementById('daysInput').value);
+      let dailyRate = parseFloat(document.getElementById('dailyRateInput').value);
 
-    let sundaysCount = countSundays(startDate, daysInput);
-    let earningDaysCount = daysInput - sundaysCount;
+      if (!startDateStr) {
+        alert('Please select a start date.');
+        return;
+      }
+      if (isNaN(initialAmount) || initialAmount <= 0) {
+        alert('Please enter a valid initial amount.');
+        return;
+      }
+      if (isNaN(daysInput) || daysInput <= 0) {
+        alert('Please enter a valid number of days.');
+        return;
+      }
+      if (isNaN(dailyRate) || dailyRate < 0) {
+        alert('Please enter a valid daily rate.');
+        return;
+      }
+      dailyRate = dailyRate / 100; // convert percentage to decimal
 
-    document.getElementById('actualEarningDays').textContent =
-      `Earning Days (excluding Sundays): ${earningDaysCount}`;
+      const bonusAmount = initialAmount * 0.05;
+      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const startDate = new Date(startDateStr);
 
-    const resultsBody = document.getElementById('resultsTableBody');
-    resultsBody.innerHTML = '';
+      let sundaysCount = countSundays(startDate, daysInput);
+      let earningDaysCount = daysInput - sundaysCount;
 
-    let totalEarnings = 0;
-    let stakedBalance = 0;
-
-    for(let i=0; i < daysInput; i++) {
-      const currentDate = new Date(startDate);
-      currentDate.setDate(startDate.getDate() + i);
-      const dow = currentDate.getDay();
-      const isSunday = dow === 0;
-
-      let fixed = 0, interest = 0, bonusToday = 0;
-
-      if(i === 0) {
-        bonusToday = bonusAmount;
-      } else if(!isSunday) {
-        fixed = initialAmount * dailyRate;
-        interest = stakedBalance * dailyRate;
+      const actualEarningEl = document.getElementById('actualEarningDays');
+      if (actualEarningEl) {
+        actualEarningEl.textContent = `Earning Days (excluding Sundays): ${earningDaysCount}`;
       }
 
-      const newStake = fixed + interest + bonusToday;
-      stakedBalance += newStake;
+      const resultsBody = document.getElementById('resultsTableBody');
+      if (!resultsBody) return;
+      resultsBody.innerHTML = '';
 
-      if(!isSunday) totalEarnings += newStake;
+      let stakedBalance = 0;
 
-      const tr = document.createElement('tr');
-      if(bonusToday > 0) tr.classList.add('bonus-row');
-      if(isSunday) tr.classList.add('sunday-row');
+      for (let i = 0; i < daysInput; i++) {
+        const currentDate = new Date(startDate);
+        currentDate.setDate(startDate.getDate() + i);
+        const dow = currentDate.getDay();
+        const isSunday = dow === 0;
 
-      tr.innerHTML = `
-        <td>${currentDate.toISOString().slice(0,10)}</td>
-        <td>${dayNames[dow]}</td>
-        <td>${i + 1}</td>
-        <td>${currency.format(fixed)}</td>
-        <td>${currency.format(interest)}</td>
-        <td>${currency.format(newStake)}</td>
-        <td>${currency.format(stakedBalance)}</td>
-      `;
-      resultsBody.appendChild(tr);
+        let fixed = 0, interest = 0, bonusToday = 0;
+
+        if (i === 0) {
+          bonusToday = bonusAmount;
+        } else if (!isSunday) {
+          fixed = initialAmount * dailyRate;
+          interest = stakedBalance * dailyRate;
+        }
+
+        const newStake = fixed + interest + bonusToday;
+        stakedBalance += newStake;
+
+        // Build row
+        const tr = document.createElement('tr');
+        if (bonusToday > 0) tr.classList.add('bonus-row');
+        if (isSunday) tr.classList.add('sunday-row');
+
+        tr.innerHTML = `
+          <td>${currentDate.toISOString().slice(0,10)}</td>
+          <td>${dayNames[dow]}</td>
+          <td>${i + 1}</td>
+          <td>${currency.format(fixed)}</td>
+          <td>${currency.format(interest)}</td>
+          <td>${currency.format(newStake)}</td>
+          <td>${currency.format(stakedBalance)}</td>
+        `;
+        resultsBody.appendChild(tr);
+      }
+
+      animateValue('stakedAmount', 0, stakedBalance);
+      animateValue('totalBalance', 0, initialAmount + stakedBalance);
+      updateBonusInfo();
+
+      // Enable export button
+      const xb = document.getElementById('exportBtn');
+      if (xb) { xb.disabled = false; xb.setAttribute('aria-disabled', 'false'); }
     }
 
-    animateValue('stakedAmount', 0, stakedBalance);
-    animateValue('totalBalance', 0, initialAmount + stakedBalance);
+    // helper: parse "$1,234.56" -> 1234.56
+    function parseCurrencyToNumber(str) {
+      if (!str) return 0;
+      const n = Number(String(str).replace(/[^0-9.-]+/g,""));
+      return isNaN(n) ? 0 : n;
+    }
 
-    updateBonusInfo();
-  }
+    function exportToExcel() {
+      try {
+        const tbody = document.getElementById('resultsTableBody');
+        if (!tbody) { alert('Results table not found. Run calculation first.'); return; }
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        if (rows.length === 0) { alert('No results to export. Please run Calculate first.'); return; }
 
-  window.onload = () => {
-    const dailyRateInput = document.getElementById('dailyRateInput');
+        // Extract headers
+        const headers = Array.from(document.querySelectorAll('#resultsTable thead th')).map(th => th.textContent.trim());
 
-    dailyRateInput.setAttribute('readonly', 'readonly');
-    updateDailyRateInput();
-    updateBonusInfo();
+        // Build Array-of-Arrays with numeric values where appropriate
+        const data = [headers];
+        rows.forEach(tr => {
+          const cells = Array.from(tr.querySelectorAll('td')).map((td, idx) => {
+            const text = td.textContent.trim();
+            // columns 3..6 (0-based idx 3..6) are currency fields -> number
+            if (idx >= 3) return parseCurrencyToNumber(text);
+            // Day # (idx 2) -> number
+            if (idx === 2) {
+              const v = Number(text);
+              return isNaN(v) ? text : v;
+            }
+            return text;
+          });
+          data.push(cells);
+        });
 
-    document.getElementById('startDate').valueAsDate = new Date();
+        // Create workbook and convert to ArrayBuffer
+        const ws = XLSX.utils.aoa_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Results');
 
-    document.getElementById('initialAmount').addEventListener('input', () => {
+        const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' }); // returns ArrayBuffer / Uint8Array
+
+        // Make blob and trigger download (mobile-friendly)
+        const blob = new Blob([wbout], { type: 'application/octet-stream' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        // filename with date
+        a.download = `uniweb_calculator_results_${new Date().toISOString().slice(0,10)}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+
+        // cleanup
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 100);
+
+      } catch (err) {
+        console.error('Export error:', err);
+        alert('Failed to export. See console for details.');
+      }
+    }
+
+    // init on DOMContentLoaded
+    window.addEventListener('DOMContentLoaded', () => {
+      const dailyRateInput = document.getElementById('dailyRateInput');
+      if (dailyRateInput) dailyRateInput.setAttribute('readonly', 'readonly');
       updateDailyRateInput();
       updateBonusInfo();
-    });
-    document.getElementById('daysInput').addEventListener('input', () => {
-      updateDailyRateInput();
-    });
+      // default start date = today
+      const sd = document.getElementById('startDate');
+      if (sd) sd.valueAsDate = new Date();
 
-    dailyRateInput.addEventListener('focus', () => {
-      dailyRateInput.removeAttribute('readonly');
-    });
-
-    dailyRateInput.addEventListener('blur', () => {
-      const val = parseFloat(dailyRateInput.value);
-      if (isNaN(val) || val < 0) {
-        dailyRateInput.setAttribute('readonly', 'readonly');
-        updateDailyRateInput();
+      const initialAmountEl = document.getElementById('initialAmount');
+      if (initialAmountEl) {
+        initialAmountEl.addEventListener('input', () => {
+          updateDailyRateInput();
+          updateBonusInfo();
+        });
       }
-    });
-  };
-</script>
 
+      const daysInputEl = document.getElementById('daysInput');
+      if (daysInputEl) {
+        daysInputEl.addEventListener('input', () => { updateDailyRateInput(); });
+      }
+
+      if (dailyRateInput) {
+        dailyRateInput.addEventListener('focus', () => { dailyRateInput.removeAttribute('readonly'); });
+        dailyRateInput.addEventListener('blur', () => {
+          const val = parseFloat(dailyRateInput.value);
+          if (isNaN(val) || val < 0) {
+            dailyRateInput.setAttribute('readonly', 'readonly');
+            updateDailyRateInput();
+          }
+        });
+      }
+
+      // ensure export disabled initially
+      const xb = document.getElementById('exportBtn');
+      if (xb) { xb.disabled = true; xb.setAttribute('aria-disabled', 'true'); }
+    });
+  </script>
 </body>
 </html>
