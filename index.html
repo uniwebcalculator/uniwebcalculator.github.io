@@ -119,26 +119,20 @@
       border-collapse: collapse;
       width: 100%;
       font-size: 0.75rem;
-      table-layout: fixed;
       border-radius: 0;
     }
     thead tr {
       background-color: #0074d9;
       color: white;
-      border-radius: 0 !important;
     }
     th, td {
       padding: 6px 6px;
       border-bottom: 1px solid #dbe9ff;
       text-align: center;
-      word-wrap: white-space: normal;
     }
     th {
-      white-space: normal;
-      max-width: 90px;
       font-size: 0.75rem;
       line-height: 1.1rem;
-      border-radius: 0 !important;
     }
     tbody tr:nth-child(even) {
       background-color: #f7faff;
@@ -146,6 +140,7 @@
     tbody tr.sunday-row td:nth-child(2) {
       color: red !important;
       font-weight: bold;
+      white-space: nowrap; /* ✅ Prevents Sunday dates from breaking */
     }
     @media (max-width: 720px) {
       table {
