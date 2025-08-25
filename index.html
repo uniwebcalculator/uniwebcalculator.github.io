@@ -119,20 +119,26 @@
       border-collapse: collapse;
       width: 100%;
       font-size: 0.75rem;
+      table-layout: fixed;
       border-radius: 0;
     }
     thead tr {
       background-color: #0074d9;
       color: white;
+      border-radius: 0 !important;
     }
     th, td {
       padding: 6px 6px;
       border-bottom: 1px solid #dbe9ff;
       text-align: center;
+      word-wrap: white-space: normal;
     }
     th {
+      white-space: normal;
+      max-width: 90px;
       font-size: 0.75rem;
       line-height: 1.1rem;
+      border-radius: 0 !important;
     }
     tbody tr:nth-child(even) {
       background-color: #f7faff;
@@ -140,7 +146,6 @@
     tbody tr.sunday-row td:nth-child(2) {
       color: red !important;
       font-weight: bold;
-      white-space: nowrap; /* ✅ Prevents Sunday dates from breaking */
     }
     @media (max-width: 720px) {
       table {
@@ -213,167 +218,167 @@
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
-<script>
-  const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+  <script>
+    const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
-  function getRate(amount) {
-    if (amount >= 35000) return 0.035;
-    if (amount >= 25000) return 0.0325;
-    if (amount >= 17000) return 0.03;
-    if (amount >= 10000) return 0.0275;
-    if (amount >= 5000) return 0.026;
-    if (amount >= 2500) return 0.025;
-    if (amount >= 1000) return 0.023;
-    if (amount >= 300) return 0.0215;
-    if (amount >= 100) return 0.02;
-    if (amount >= 20) return 0.015;
-    return 0;
-  }
-
-  function formatDateDDMMYY(date) {
-    const dd = String(date.getDate()).padStart(2, '0');
-    const mm = String(date.getMonth() + 1).padStart(2, '0');
-    const yy = String(date.getFullYear()).slice(-2);
-    return `${dd}-${mm}-${yy}`;
-  }
-
-  function updateDailyRateInput() {
-    const initialAmount = parseFloat(document.getElementById('initialAmount').value) || 0;
-    const calculatedRate = getRate(initialAmount) * 100;
-    const dailyRateInput = document.getElementById('dailyRateInput');
-    if (dailyRateInput.hasAttribute('readonly')) {
-      dailyRateInput.value = calculatedRate.toFixed(2);
+    function getRate(amount) {
+      if (amount >= 35000) return 0.035;
+      if (amount >= 25000) return 0.0325;
+      if (amount >= 17000) return 0.03;
+      if (amount >= 10000) return 0.0275;
+      if (amount >= 5000) return 0.026;
+      if (amount >= 2500) return 0.025;
+      if (amount >= 1000) return 0.023;
+      if (amount >= 300) return 0.0215;
+      if (amount >= 100) return 0.02;
+      if (amount >= 20) return 0.015;
+      return 0;
     }
-  }
 
-  function countSundays(startDate, totalDays) {
-    let sundays = 0;
-    for (let i = 0; i < totalDays; i++) {
-      let d = new Date(startDate);
-      d.setDate(d.getDate() + i);
-      if (d.getDay() === 0) sundays++;
+    function formatDateDDMMYY(date) {
+      const dd = String(date.getDate()).padStart(2, '0');
+      const mm = String(date.getMonth() + 1).padStart(2, '0');
+      const yy = String(date.getFullYear()).slice(-2);
+      return `${dd}-${mm}-${yy}`;
     }
-    return sundays;
-  }
 
-  function animateValue(id, start, end, duration = 800) {
-    const el = document.getElementById(id);
-    const range = end - start;
-    let startTime = null;
-    function step(timestamp) {
-      if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / duration, 1);
-      const val = start + progress * range;
-      el.textContent = currency.format(val);
-      if (progress < 1) requestAnimationFrame(step);
+    function updateDailyRateInput() {
+      const initialAmount = parseFloat(document.getElementById('initialAmount').value) || 0;
+      const calculatedRate = getRate(initialAmount) * 100;
+      const dailyRateInput = document.getElementById('dailyRateInput');
+      if (dailyRateInput.hasAttribute('readonly')) {
+        dailyRateInput.value = calculatedRate.toFixed(2);
+      }
     }
-    requestAnimationFrame(step);
-  }
 
-  function calculate() {
-    const startDateStr = document.getElementById('startDate').value;
-    const initialAmount = parseFloat(document.getElementById('initialAmount').value);
-    const daysInput = parseInt(document.getElementById('daysInput').value);
-    let dailyRate = parseFloat(document.getElementById('dailyRateInput').value);
-    const bonusOption = document.querySelector('input[name="bonusOption"]:checked').value;
+    function countSundays(startDate, totalDays) {
+      let sundays = 0;
+      for (let i = 0; i < totalDays; i++) {
+        let d = new Date(startDate);
+        d.setDate(d.getDate() + i);
+        if (d.getDay() === 0) sundays++;
+      }
+      return sundays;
+    }
 
-    if (!startDateStr) { alert('Please select a start date.'); return; }
-    if (isNaN(initialAmount) || initialAmount <= 0) { alert('Please enter a valid initial amount.'); return; }
-    if (isNaN(daysInput) || daysInput <= 0) { alert('Please enter a valid number of days.'); return; }
-    if (isNaN(dailyRate) || dailyRate < 0) { alert('Please enter a valid daily rate.'); return; }
+    function animateValue(id, start, end, duration = 800) {
+      const el = document.getElementById(id);
+      const range = end - start;
+      let startTime = null;
+      function step(timestamp) {
+        if (!startTime) startTime = timestamp;
+        const progress = Math.min((timestamp - startTime) / duration, 1);
+        const val = start + progress * range;
+        el.textContent = currency.format(val);
+        if (progress < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
 
-    dailyRate = dailyRate / 100;
-    const startDate = new Date(startDateStr);
+    function calculate() {
+      const startDateStr = document.getElementById('startDate').value;
+      const initialAmount = parseFloat(document.getElementById('initialAmount').value);
+      const daysInput = parseInt(document.getElementById('daysInput').value);
+      let dailyRate = parseFloat(document.getElementById('dailyRateInput').value);
+      const bonusOption = document.querySelector('input[name="bonusOption"]:checked').value;
 
-    let sundaysCount = countSundays(startDate, daysInput);
-    let earningDaysCount = daysInput - sundaysCount;
-    document.getElementById('actualEarningDays').textContent =
-      `Earning Days (excluding Sundays): ${earningDaysCount}`;
+      if (!startDateStr) { alert('Please select a start date.'); return; }
+      if (isNaN(initialAmount) || initialAmount <= 0) { alert('Please enter a valid initial amount.'); return; }
+      if (isNaN(daysInput) || daysInput <= 0) { alert('Please enter a valid number of days.'); return; }
+      if (isNaN(dailyRate) || dailyRate < 0) { alert('Please enter a valid daily rate.'); return; }
 
-    const resultsBody = document.getElementById('resultsTableBody');
-    resultsBody.innerHTML = '';
+      dailyRate = dailyRate / 100;
+      const startDate = new Date(startDateStr);
 
-    let stakedBalance = 0;
-    let cumulativeIncome = 0; // ← new cumulative income variable
+      let sundaysCount = countSundays(startDate, daysInput);
+      let earningDaysCount = daysInput - sundaysCount;
+      document.getElementById('actualEarningDays').textContent =
+        `Earning Days (excluding Sundays): ${earningDaysCount}`;
 
-    for (let i = 0; i < daysInput; i++) {
-      const currentDate = new Date(startDate);
-      currentDate.setDate(startDate.getDate() + i);
-      const isSunday = currentDate.getDay() === 0;
+      const resultsBody = document.getElementById('resultsTableBody');
+      resultsBody.innerHTML = '';
 
-      let taskEarning = 0;
+      let stakedBalance = 0;
+      let incomeBalance = 0;
 
-      // Task earning starts from Day 2 and only on non-Sundays
-      if (i > 0 && !isSunday) {
-        taskEarning = initialAmount * dailyRate;
+      for (let i = 0; i < daysInput; i++) {
+        const currentDate = new Date(startDate);
+        currentDate.setDate(startDate.getDate() + i);
+        const isSunday = currentDate.getDay() === 0;
+
+        let taskEarning = 0;
+
+        // Task earning starts from Day 2 and only on non-Sundays
+        if (i > 0 && !isSunday) {
+          taskEarning = initialAmount * dailyRate;
+        }
+
+        // Today's income (task + possible bonus on Day 1)
+        incomeBalance = taskEarning;
+        if (i === 0 && bonusOption === "yes") {
+          incomeBalance += initialAmount * 0.05;
+        }
+
+        // Base before interest includes previous stake + today's income
+        const baseBeforeInterest = stakedBalance + incomeBalance;
+
+        // Staking return (apply interest; keep Sundays excluded if desired)
+        const stakingReturn = isSunday ? 0 : baseBeforeInterest * dailyRate;
+
+        // Update stake after adding today's income and interest
+        stakedBalance = baseBeforeInterest + stakingReturn;
+
+        const tr = document.createElement('tr');
+        if (isSunday) tr.classList.add('sunday-row');
+
+        tr.innerHTML = `
+          <td>${i + 1}</td>
+          <td>${formatDateDDMMYY(currentDate)}</td>
+          <td>${currency.format(taskEarning)}</td>
+          <td>${currency.format(incomeBalance)}</td>
+          <td>${currency.format(stakingReturn)}</td>
+          <td>${currency.format(stakedBalance)}</td>
+        `;
+        resultsBody.appendChild(tr);
+
+        // Reset income balance (we show per-day income, not cumulative)
+        incomeBalance = 0;
       }
 
-      // Today's income (task + possible bonus on Day 1)
-      let todayIncome = taskEarning;
-      if (i === 0 && bonusOption === "yes") {
-        todayIncome += initialAmount * 0.05;
-      }
-
-      cumulativeIncome += todayIncome; // ← accumulate income
-      const incomeBalance = cumulativeIncome; // ← show cumulative income
-
-      // Base before interest includes previous stake + today's income
-      const baseBeforeInterest = stakedBalance + todayIncome;
-
-      // Staking return (apply interest; keep Sundays excluded if desired)
-      const stakingReturn = isSunday ? 0 : baseBeforeInterest * dailyRate;
-
-      // Update stake after adding today's income and interest
-      stakedBalance = baseBeforeInterest + stakingReturn;
-
-      const tr = document.createElement('tr');
-      if (isSunday) tr.classList.add('sunday-row');
-
-      tr.innerHTML = `
-        <td>${i + 1}</td>
-        <td>${formatDateDDMMYY(currentDate)}</td>
-        <td>${currency.format(taskEarning)}</td>
-        <td>${currency.format(incomeBalance)}</td>
-        <td>${currency.format(stakingReturn)}</td>
-        <td>${currency.format(stakedBalance)}</td>
-      `;
-      resultsBody.appendChild(tr);
+      animateValue('stakedAmount', 0, stakedBalance);
+      const xb = document.getElementById('exportBtn');
+      if (xb) { xb.disabled = false; xb.setAttribute('aria-disabled', 'false'); }
     }
 
-    animateValue('stakedAmount', 0, stakedBalance);
-    const xb = document.getElementById('exportBtn');
-    if (xb) { xb.disabled = false; xb.setAttribute('aria-disabled', 'false'); }
-  }
+    function exportToExcel() {
+      const table = document.getElementById("resultsTable");
+      const wb = XLSX.utils.table_to_book(table, { sheet: "Earnings" });
+      XLSX.writeFile(wb, "earnings.xlsx");
+    }
 
-  function exportToExcel() {
-    const table = document.getElementById("resultsTable");
-    const wb = XLSX.utils.table_to_book(table, { sheet: "Earnings" });
-    XLSX.writeFile(wb, "earnings.xlsx");
-  }
-
-  window.addEventListener('DOMContentLoaded', () => {
-    const dailyRateInput = document.getElementById('dailyRateInput');
-    dailyRateInput.setAttribute('readonly', 'readonly');
-    updateDailyRateInput();
-    document.getElementById('startDate').valueAsDate = new Date();
-
-    document.getElementById('initialAmount').addEventListener('input', () => {
+    window.addEventListener('DOMContentLoaded', () => {
+      const dailyRateInput = document.getElementById('dailyRateInput');
+      dailyRateInput.setAttribute('readonly', 'readonly');
       updateDailyRateInput();
-    });
-    document.getElementById('daysInput').addEventListener('input', () => { updateDailyRateInput(); });
+      document.getElementById('startDate').valueAsDate = new Date();
 
-    dailyRateInput.addEventListener('focus', () => { dailyRateInput.removeAttribute('readonly'); });
-    dailyRateInput.addEventListener('blur', () => {
-      const val = parseFloat(dailyRateInput.value);
-      if (isNaN(val) || val < 0) {
-        dailyRateInput.setAttribute('readonly', 'readonly');
+      document.getElementById('initialAmount').addEventListener('input', () => {
         updateDailyRateInput();
-      }
-    });
+      });
+      document.getElementById('daysInput').addEventListener('input', () => { updateDailyRateInput(); });
 
-    const xb = document.getElementById('exportBtn');
-    if (xb) { xb.disabled = true; xb.setAttribute('aria-disabled', 'true'); }
-  });
-</script>
+      dailyRateInput.addEventListener('focus', () => { dailyRateInput.removeAttribute('readonly'); });
+      dailyRateInput.addEventListener('blur', () => {
+        const val = parseFloat(dailyRateInput.value);
+        if (isNaN(val) || val < 0) {
+          dailyRateInput.setAttribute('readonly', 'readonly');
+          updateDailyRateInput();
+        }
+      });
+
+      const xb = document.getElementById('exportBtn');
+      if (xb) { xb.disabled = true; xb.setAttribute('aria-disabled', 'true'); }
+    });
+  </script>
 </body>
 </html>
