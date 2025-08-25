@@ -140,18 +140,8 @@
       line-height: 1.1rem;
       border-radius: 0 !important;
     }
-    #resultsTable th:nth-child(2), #resultsTable td:nth-child(2) {
-      width: 65px;
-      padding: 4px;
-      font-size: 0.75rem;
-    }
     tbody tr:nth-child(even) {
       background-color: #f7faff;
-    }
-    tbody tr.bonus-row {
-      background-color: #daf1da !important;
-      font-weight: 700;
-      color: #006400;
     }
     tbody tr.sunday-row td:nth-child(2) {
       color: red !important;
@@ -172,8 +162,7 @@
   <h2>UNIWEB Calculator</h2>
 
   <div class="top-dashboard">
-    <div>Staking Balance <span id="stakedAmount">$0.00</span></div>
-    <div>Total Balance <span id="totalBalance">$0.00</span></div>
+    <div>Staking Balance (withdrawable amount) <span id="stakedAmount">$0.00</span></div>
   </div>
 
   <div class="input-container">
@@ -193,11 +182,17 @@
       <label for="dailyRateInput">Daily Rate %:</label>
       <input type="number" id="dailyRateInput" step="0.01" min="0" />
     </div>
+    <div class="input-group horizontal">
+      <label>Bonus 5%:</label>
+      <div>
+        <label><input type="radio" name="bonusOption" value="yes" checked /> Yes</label>
+        <label><input type="radio" name="bonusOption" value="no" /> No</label>
+      </div>
+    </div>
   </div>
 
   <div class="stats-line">
     <div id="actualEarningDays">Earning Days (excluding Sundays): 0</div>
-    <div id="bonusInfo">Bonus: $0.00 (5% of initial)</div>
   </div>
 
   <div class="btn-row">
@@ -209,12 +204,12 @@
     <table id="resultsTable">
       <thead>
         <tr>
-          <th>Day #</th>
+          <th>Day</th>
           <th>Date</th>
           <th>Task Earning</th>
-          <th>Stake Interest</th>
-          <th>New Stake</th>
-          <th>Stake Balance</th>
+          <th>Income Balance</th>
+          <th>Staking Return</th>
+          <th>Staking Balance</th>
         </tr>
       </thead>
       <tbody id="resultsTableBody"></tbody>
@@ -256,12 +251,6 @@
       }
     }
 
-    function updateBonusInfo() {
-      const initialAmount = parseFloat(document.getElementById('initialAmount').value) || 0;
-      const bonusAmount = initialAmount * 0.05;
-      document.getElementById('bonusInfo').textContent = `Bonus: ${currency.format(bonusAmount)} (5% of initial)`;
-    }
-
     function countSundays(startDate, totalDays) {
       let sundays = 0;
       for (let i = 0; i < totalDays; i++) {
@@ -291,6 +280,7 @@
       const initialAmount = parseFloat(document.getElementById('initialAmount').value);
       const daysInput = parseInt(document.getElementById('daysInput').value);
       let dailyRate = parseFloat(document.getElementById('dailyRateInput').value);
+      const bonusOption = document.querySelector('input[name="bonusOption"]:checked').value;
 
       if (!startDateStr) { alert('Please select a start date.'); return; }
       if (isNaN(initialAmount) || initialAmount <= 0) { alert('Please enter a valid initial amount.'); return; }
@@ -298,12 +288,10 @@
       if (isNaN(dailyRate) || dailyRate < 0) { alert('Please enter a valid daily rate.'); return; }
 
       dailyRate = dailyRate / 100;
-      const bonusAmount = initialAmount * 0.05;
       const startDate = new Date(startDateStr);
 
       let sundaysCount = countSundays(startDate, daysInput);
       let earningDaysCount = daysInput - sundaysCount;
-
       document.getElementById('actualEarningDays').textContent =
         `Earning Days (excluding Sundays): ${earningDaysCount}`;
 
@@ -311,43 +299,53 @@
       resultsBody.innerHTML = '';
 
       let stakedBalance = 0;
+      let incomeBalance = 0;
 
       for (let i = 0; i < daysInput; i++) {
         const currentDate = new Date(startDate);
         currentDate.setDate(startDate.getDate() + i);
         const isSunday = currentDate.getDay() === 0;
 
-        let fixed = 0, interest = 0, bonusToday = 0;
+        let taskEarning = 0;
 
-        if (i === 0) {
-          bonusToday = bonusAmount;
-        } else if (!isSunday) {
-          fixed = initialAmount * dailyRate;
-          interest = stakedBalance * dailyRate;
+        // Task earning starts from Day 2 and only on non-Sundays
+        if (i > 0 && !isSunday) {
+          taskEarning = initialAmount * dailyRate;
         }
 
-        const newStake = fixed + interest + bonusToday;
-        stakedBalance += newStake;
+        // Today's income (task + possible bonus on Day 1)
+        incomeBalance = taskEarning;
+        if (i === 0 && bonusOption === "yes") {
+          incomeBalance += initialAmount * 0.05;
+        }
+
+        // Base before interest includes previous stake + today's income
+        const baseBeforeInterest = stakedBalance + incomeBalance;
+
+        // Staking return (apply interest; keep Sundays excluded if desired)
+        const stakingReturn = isSunday ? 0 : baseBeforeInterest * dailyRate;
+
+        // Update stake after adding today's income and interest
+        stakedBalance = baseBeforeInterest + stakingReturn;
 
         const tr = document.createElement('tr');
-        if (bonusToday > 0) tr.classList.add('bonus-row');
         if (isSunday) tr.classList.add('sunday-row');
 
         tr.innerHTML = `
           <td>${i + 1}</td>
           <td>${formatDateDDMMYY(currentDate)}</td>
-          <td>${currency.format(fixed)}</td>
-          <td>${currency.format(interest)}</td>
-          <td>${currency.format(newStake)}</td>
+          <td>${currency.format(taskEarning)}</td>
+          <td>${currency.format(incomeBalance)}</td>
+          <td>${currency.format(stakingReturn)}</td>
           <td>${currency.format(stakedBalance)}</td>
         `;
         resultsBody.appendChild(tr);
+
+        // Reset income balance (we show per-day income, not cumulative)
+        incomeBalance = 0;
       }
 
       animateValue('stakedAmount', 0, stakedBalance);
-      animateValue('totalBalance', 0, initialAmount + stakedBalance);
-      updateBonusInfo();
-
       const xb = document.getElementById('exportBtn');
       if (xb) { xb.disabled = false; xb.setAttribute('aria-disabled', 'false'); }
     }
@@ -362,12 +360,10 @@
       const dailyRateInput = document.getElementById('dailyRateInput');
       dailyRateInput.setAttribute('readonly', 'readonly');
       updateDailyRateInput();
-      updateBonusInfo();
       document.getElementById('startDate').valueAsDate = new Date();
 
       document.getElementById('initialAmount').addEventListener('input', () => {
         updateDailyRateInput();
-        updateBonusInfo();
       });
       document.getElementById('daysInput').addEventListener('input', () => { updateDailyRateInput(); });
 
